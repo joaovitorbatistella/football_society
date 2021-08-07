@@ -1,11 +1,11 @@
 <?php
-  $test='teste';
-  $username = 'doadmin';
-  $password = 'lr0exq0rsauvwhqe';
-  $host = 'db-postgresql-football-society-do-user-7816146-0.b.db.ondigitalocean.com';
-  $port = '25060';
-  $database = 'defaultdb';
-  $sslmode = 'require';
+  $test='';
+  $username = '';
+  $password = '';
+  $host = '';
+  $port = '';
+  $database = '';
+  $sslmode = '';
   $conn_string = "host=".$host." port=".$port." dbname=".$database." user=".$username." password=".$password."";
   $dbconn = pg_connect($conn_string);
   if ($dbconn) {
