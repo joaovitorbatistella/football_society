@@ -17,6 +17,7 @@ class RequestValidator
 
     const GET = 'GET';
     const DELETE = 'DELETE';
+    const POST = 'POST';
     const USERS = 'USERS';
     const ATTENDANCE = 'ATTENDANCE';
 
@@ -48,11 +49,18 @@ class RequestValidator
      */
     private function directRequest()
     {
-        if ($this->request['method'] !== self::GET && $this->request['method'] !== self::DELETE) {
+        if ($this->request['route'] === 'USERS' && $this->request['resource'] === 'login' && $this->request['method'] === 'POST'){
             $this->requestData = Json::handleBodyRequest();
+            $method = $this->request['method'].'login';
+        } else {
+            if ($this->request['method'] !== self::GET && $this->request['method'] !== self::DELETE) {
+                $this->requestData = Json::handleBodyRequest();
+                $method = $this->request['method'];
+            } else if($this->request['resource'] === 'logout') {
+                $method = $this->request['method'].'logout';
+            }
+            $this->AuthorizationToken->validToken(getallheaders()['Authorization']);
         }
-        $this->AuthorizationToken->validToken(getallheaders()['Authorization']);
-        $method = $this->request['method'];
         return $this->$method();
     }
 
@@ -72,6 +80,48 @@ class RequestValidator
                 case self::ATTENDANCE:
                     $handleAttendance = new handleAttendance($this->request);
                     $return = $handleAttendance->validateDelete();
+                    break;
+                default:
+                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
+            }
+        }
+        return $return;
+    }
+
+        /**
+     * Metodo para tratar o POSTlogin
+     * @return array|null|string
+     */
+    private function POSTlogin()
+    {
+        $return = null;
+        if (in_array($this->request['route'], GenericConsts::POST_TYPE, true)) {
+            switch ($this->request['route']) {
+                case self::USERS:
+                    $handleUser = new handleUser($this->request);
+                    $handleUser->setBodyDataRequests($this->requestData);
+                    $return = $handleUser->validatelogin();
+                    break;
+                default:
+                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
+            }
+            return $return;
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
+    }
+
+    /**
+     * Metodo para tratar o GETlogin
+     * @return array|mixed|string
+     */
+    private function GETlogout()
+    {
+        $return = utf8_encode(GenericConsts::MSG_ERROR_ROUTER_TYPE);
+        if (in_array($this->request['route'], GenericConsts::GET_TYPE, true)) {
+            switch ($this->request['route']) {
+                case self::USERS:
+                    $handleUser = new handleUser($this->request);
+                    $return = $handleUser->validateLogout();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);

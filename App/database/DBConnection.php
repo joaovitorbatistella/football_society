@@ -51,7 +51,7 @@ class DBConnection
                 return GenericConsts::MSG_DELETADO_SUCESSO;
             }
             $this->db->rollBack();
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_SEM_RETORNO);
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
         }
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
     }
@@ -65,12 +65,16 @@ class DBConnection
         if ($table) {
             $sql = 'SELECT * FROM ' . $table;
             $stmt = $this->db->query($sql);
-            $row = $stmt->fetchAll($this->db::FETCH_ASSOC);
-            if (is_array($row) && count($row) > 0) {
-                return $row;
+            if($stmt) {
+                $row = $stmt->fetchAll($this->db::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
             }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_TABLE_NOT_FOUND);
         }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_SEM_RETORNO);
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
     }
 
     /**
@@ -89,7 +93,7 @@ class DBConnection
             if ($row === 1) {
                 return $stmt->fetch($this->db::FETCH_ASSOC);
             }
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_SEM_RETORNO);
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
         }
 
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);

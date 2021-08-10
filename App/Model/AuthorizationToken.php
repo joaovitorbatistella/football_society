@@ -5,10 +5,11 @@ namespace Model;
 use database\DBConnection;
 use InvalidArgumentException;
 use Infra\GenericConsts;
+use PDO;
 
 class AuthorizationToken
 {
-    private object $pg;
+    private object $Conn;
     public const TABLE = 'authorized_tokens';
 
     /**
@@ -16,7 +17,94 @@ class AuthorizationToken
      */
     public function __construct()
     {
-        $this->pg = new DBConnection();
+        $this->Conn = new DBConnection();
+        $this->DateTime = new DateTime();
+    }
+
+    public function getOneByToken($token)
+    {
+        if ($token) {
+            $token = str_replace([' ', 'Bearer'], '', $token);
+            $sql = 'SELECT id FROM ' . self::TABLE .  ' WHERE token = :token';
+            $stmt = $this->getConn()->getDb()->prepare($sql);
+            $stmt->bindParam(':token', $token);
+            $stmt->execute();
+            $row = $stmt->rowCount();
+            if ($row === 1) {
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
+    }
+
+    public function destroyById($id)
+    {
+        if ($id) {
+            $sql = 'DELETE FROM ' . self::TABLE .  ' WHERE id = :id';
+            $stmt = $this->getConn()->getDb()->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $row = $stmt->rowCount();
+            if ($row === 1) {
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
+    }
+
+    /**
+     * @param $token
+     */
+    public function generateToken($username, $password)
+    {
+        $key = SECRET;
+
+        //Header Token
+        $header = [
+            'typ' => 'JWT',
+            'alg' => 'HS256'
+        ];
+
+        //Payload - Content
+        $payload = [
+            'exp' => $this->DateTime->getNow(),
+            'uid' => 1,
+            'username' => $username,
+        ];
+
+        //JSON
+        $header = json_encode($header);
+        $payload = json_encode($payload);
+
+        //Base 64
+        $header = base64_encode($header);
+        $payload = base64_encode($payload);
+
+        //Sign
+        $sign = hash_hmac('sha256', $header . "." . $payload, $key, true);
+        $sign = base64_encode($sign);
+
+        //Token
+        $token = $header . '.' . $payload . '.' . $sign;
+
+        if ($token) {
+            $sqlInsert = 'INSERT INTO authorized_tokens (token, status) VALUES (:token, :status)';
+            $stmt = $this->getConn()->getDb()->prepare($sqlInsert);
+            $stmt->bindParam(':token', $token);
+            $stmt->bindValue(':status', GenericConsts::SIM);
+            $stmt->execute();
+            $stmt->rowCount();
+            if($stmt) {
+                return $token;
+            }
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
+        } else {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TOKEN_VAZIO);
+        }
     }
 
     /**
@@ -42,10 +130,10 @@ class AuthorizationToken
     }
 
     /**
-     * @return pg|object
+     * @return Conn|object
      */
     public function getConn()
     {
-        return $this->pg;
+        return $this->Conn;
     }
 }

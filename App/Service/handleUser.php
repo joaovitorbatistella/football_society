@@ -4,6 +4,7 @@ namespace Service;
 
 use InvalidArgumentException;
 use Model\User;
+use Model\AuthorizationToken;
 use Infra\GenericConsts;
 
 class handleUser
@@ -11,6 +12,8 @@ class handleUser
     public const TABLE = 'users';
     public const GET_RESOURCES = ['list'];
     public const POST_RESOURCES = ['store'];
+    public const LOGIN_RESOURCES = ['login'];
+    public const LOGOUT_RESOURCES = ['logout'];
     public const DELETE_RESOURCES = ['delete'];
     public const PUT_RESOURCES = ['update'];
 
@@ -20,6 +23,7 @@ class handleUser
      * @var object|User
      */
     private object $User;
+    private object $AuthorizationToken;
 
     /**
      * handleUser constructor.
@@ -29,6 +33,48 @@ class handleUser
     {
         $this->data = $data;
         $this->User = new User();
+        $this->AuthorizationToken = new AuthorizationToken();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function validateLogin()
+    {
+        $return = null;
+        $resource = $this->data['resource'];
+        if (in_array($resource, self::LOGIN_RESOURCES, true)) {
+            $return = $this->$resource();
+        } else {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
+        }
+
+        if ($return === null) {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
+        }
+
+        return $return;
+    }
+
+     /**
+     * @return mixed
+     */
+    public function validateLogout()
+    {
+        $return = null;
+        $resource = $this->data['resource'];
+        if (in_array($resource, self::LOGOUT_RESOURCES, true)) {
+            $return = $this->$resource();
+            var_dump($return);exit;
+        } else {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
+        }
+
+        if ($return === null) {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
+        }
+
+        return $return;
     }
 
     /**
@@ -125,6 +171,35 @@ class handleUser
     public function setBodyDataRequests($bodyDataRequests)
     {
         $this->bodyDataRequests = $bodyDataRequests;
+
+    }
+
+    /**
+     * @return mixed
+     */
+    private function login()
+    {
+        [$username, $password] = [$this->bodyDataRequests['username'], $this->bodyDataRequests['password']];
+
+        if ($username && $password) {
+            if ($this->User->handleLogin($username, $password) > 0) {
+                $token = $this->AuthorizationToken->generateToken($username, $password);
+                return ['insertedId' => $insertedId, 'token' => $token];
+            }
+
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_SENHA_OBRIGATORIO);
+    }
+
+      /**
+     * @return mixed
+     */
+    private function logout()
+    {
+        $token = getallheaders()['Authorization'];
+        $token = $this->AuthorizationToken->getOneByToken($token);
+        $result = $this->AuthorizationToken->destroyById($token['id']);
     }
 
     /**
@@ -148,14 +223,14 @@ class handleUser
      */
     private function store()
     {
-        [$login, $senha] = [$this->bodyDataRequests['login'], $this->bodyDataRequests['senha']];
+        [$username, $password] = [$this->bodyDataRequests['username'], $this->bodyDataRequests['password']];
 
-        if ($login && $senha) {
-            if ($this->User->getRegistroByLogin($login) > 0) {
+        if ($username && $password) {
+            if ($this->User->getRegistroByLogin($username) > 0) {
                 throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_EXISTENTE);
             }
 
-            if ($this->User->insertUser($login, $senha) > 0) {
+            if ($this->User->insertUser($username, $password) > 0) {
                 $idInserido = $this->User->getConn()->getDb()->lastInsertId();
                 $this->User->getConn()->getDb()->commit();
                 return ['id_inserido' => $idInserido];

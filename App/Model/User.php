@@ -18,6 +18,21 @@ class User
     }
 
     /**
+     * @param $username
+     * @param $password
+     * @return int
+     */
+    public function handleLogin($username, $password)
+    {
+        $sql = 'SELECT * FROM ' . self::TABLE . ' WHERE nome_de_usuario = :username AND senha = :password';
+        $stmt = $this->Conn->getDb()->prepare($sql);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':password', $password);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    /**
      * @param $login
      * @return int
      */
