@@ -1,21 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="./view/css/style.css" media="screen" />
-  <title>Document</title>
-</head>
-<body>
-  <div class="container">
-    <nav class="row">
-      <ul class="ul">
-        <li><a href="/">Home</a></li>
-        <li><a href="/views/attendance/">Atendimento</a></li>
-        <li><a href="/share/orm/">BD</a></li>
-      </ul>
-    </nav>
-  </div>
-</body>
-</html>
+<?php
+
+use Infra\GenericConsts;
+use Infra\Json;
+use Infra\Routes;
+use Validator\RequestValidator;
+
+require_once('env.php');
+
+try {
+    $RequestValidator = new RequestValidator(Routes::getRoutes());
+    $return = $RequestValidator->handleRequest();
+
+    $Json = new Json();
+    $Json->handleReturnArray($return);
+
+} catch (Exception $exception) {
+    echo json_encode([
+        GenericConsts::TYPE => GenericConsts::ERROR_TYPE,
+        GenericConsts::RESPONSE => utf8_encode($exception->getMessage())
+    ], JSON_THROW_ON_ERROR, 512);
+    exit;
+}

@@ -1,6 +1,6 @@
 <?php
 
-include_once '../services/UserStore.php';
+include_once '../service/handleUser.php';
 
 $dao = new UserStore();
 

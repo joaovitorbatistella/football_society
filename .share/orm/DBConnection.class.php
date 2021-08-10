@@ -12,6 +12,7 @@
  * $insercao->execute(); // Executa a instrução no banco de dados (com os parâmetros já substituídos por seus respectivos valores).
  * ```
  */
+require_once('../../.env.php');
 class DBConnection
 {
     # Variável que guarda a conexão PDO.
@@ -21,18 +22,10 @@ class DBConnection
     private function __construct()
     {
         # Informações sobre o banco de dados:
-        $host = "db-postgresql-football-society-do-user-7816146-0.b.db.ondigitalocean.com";
-        $database = "defaultdb";
-        $username = "doadmin";
-        $password = "lr0exq0rsauvwhqe";
-        $port = "25060";
-        $sslmode = "require";
-        $db_driver = "pgsql";
-
         try
         {
             # Atribui o objeto PDO à variável $db.
-            self::$db = new PDO("$db_driver:host=$host; port=$port; dbname=$database", $username, $password);
+            self::$db = new PDO(''.DRIVER.':host='.HOST.'; port='.PORT.'; dbname='.DATABASE.'', $username, $password);
             # Garante que o PDO lance exceções durante erros.
             self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
