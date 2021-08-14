@@ -3,6 +3,9 @@
 namespace Model;
 
 use database\DBConnection;
+use PDO;
+use InvalidArgumentException;
+use Infra\GenericConsts;
 
 class User
 {
@@ -30,6 +33,23 @@ class User
         $stmt->bindParam(':password', $password);
         $stmt->execute();
         return $stmt->rowCount();
+    }
+
+    public function getAllUsers($table)
+    {
+        if ($table) {
+            $sql = 'SELECT codigo, nome, nome_de_usuario FROM ' . $table;
+            $stmt = $this->getConn()->getDb()->query($sql);
+            if($stmt) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
+            }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_TABLE_NOT_FOUND);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
     }
 
     /**

@@ -207,7 +207,7 @@ class handleUser
      */
     private function list()
     {
-        return $this->User->getConn()->getAll(self::TABLE);
+        return $this->User->getAllUsers(self::TABLE);
     }
 
     /**
