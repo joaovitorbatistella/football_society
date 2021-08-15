@@ -1,7 +1,66 @@
-# Projeto de sistema para trabalho de Banco de dados
+___
 
-- Tecnologias usadas:
+# Projeto de sistema de controle de caixa em quadras de futebol society: Projeto realizado para trabalho da disciplina de Banco de Dados
+___
+##### by: João Vítor Batistella, Henrique, Alex e José Gomes
+___
+
+## Tecnologias usadas:
   * PHP nativo
   * Vue.js
   * Nuxt.js
   * Vuetify.js
+___
+
+## To-Do: Rest API
+
+
+#### Usuários
+
+* Requisitos: 
+  - [x] __GET:__ Mostrar todos os usuários __" /users/list "__
+  - [ ] __GET:__ Mostrar usuários filtrando pelo nome de usuário
+  - [ ] __POST:__ Inserir um novo usuário
+  - [ ] __PUT:__ Editar um produto, passando seu ID
+  - [ ] __DELETE:__ Excluir um produto passando seu ID
+  ___
+
+#### Produto
+
+* Requisitos: 
+  - [ ] __GET:__ Mostrar todos os produtos
+  - [ ] __GET:__ Mostrar produtos filtrando pelo nome
+  - [ ] __POST:__ Inserir um novo produto
+  - [ ] __PUT:__ Editar um produto, passando seu ID
+  - [ ] __DELETE:__ Excluir um produto passando seu ID
+  ___
+
+#### Cliente
+
+* Requisitos: 
+  - [ ] __GET:__ Mostrar todos os clientes, __(JOIN na tabela cidade)__
+  - [ ] __GET:__ Mostrar clientes filtrando pelo nome, cpf ou email
+  - [ ] __POST:__ Inserir um novo cliente
+  - [ ] __PUT:__ Editar um cliente, passando seu ID
+  - [ ] __DELETE:__ Excluir um cliente passando seu ID
+  ___
+
+#### Fornecedor
+
+* Requisitos: 
+  - [ ] __GET:__ Mostrar todos os fornecedores, __(JOIN na tabela cidade)__
+  - [ ] __GET:__ Mostrar fornecedores filtrando pelo nome
+  - [ ] __POST:__ Inserir um novo fornecedor
+  - [ ] __PUT:__ Editar um fornecedor, passando seu ID
+  - [ ] __DELETE:__ Excluir um fornecedor passando seu ID
+  ___
+
+#### Jogo
+
+* Requisitos: 
+  - [ ] __GET:__ Mostrar todos os jogos, __(JOIN na tabela atendimento)__
+  - [ ] __GET:__ Mostrar jogos filtrando pelo horário
+  - [ ] __POST:__ Inserir um novo jogo
+  - [ ] __PUT:__ Editar um jogo, passando seu ID
+  - [ ] __DELETE:__ Excluir um jogo passando seu ID
+  ___
