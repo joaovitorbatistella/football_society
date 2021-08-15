@@ -10,7 +10,7 @@ use Infra\GenericConsts;
 class handleUser
 {
     public const TABLE = 'users';
-    public const GET_RESOURCES = ['list'];
+    public const GET_RESOURCES = ['list', 'filterByName'];
     public const POST_RESOURCES = ['store'];
     public const LOGIN_RESOURCES = ['login'];
     public const LOGOUT_RESOURCES = ['logout'];
@@ -75,6 +75,7 @@ class handleUser
 
         return $return;
     }
+    
 
     /**
      * @return mixed
@@ -211,6 +212,15 @@ class handleUser
     }
 
     /**
+     * @param $username
+     * @return mixed
+     */
+    private function filterByName($username)
+    {
+        return $this->User->getUserByUsernae($username);
+    }
+
+    /**
      * @return mixed
      */
     private function getOneByKey()
@@ -226,7 +236,7 @@ class handleUser
         [$username, $password] = [$this->bodyDataRequests['username'], $this->bodyDataRequests['password']];
 
         if ($username && $password) {
-            if ($this->User->getRegistroByLogin($username) > 0) {
+            if ($this->User->getRegisterByLogin($username) > 0) {
                 throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_EXISTENTE);
             }
 

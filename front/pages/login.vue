@@ -34,15 +34,25 @@
         </form>
       </v-row >
     </v-col>
+    <loader
+      :message="loaderMessage"
+      :dialog="loading"
+    />
   </v-row>
 </template>
 
 <script>
 import Cookies from 'js-cookie'
+import Loader from '../components/loader.vue'
 
   export default {
     middleware: ['notAuthenticated'],
+    componentes: {
+      Loader
+    },
     data: () => ({
+      loading: false,
+      loaderMessage: 'Entrando',
       password: '',
       username: '',
     }),
@@ -54,13 +64,18 @@ import Cookies from 'js-cookie'
           "username": this.username,
           "password": this.password
         }
+        this.loading = true
         this.$axios
         .post(`users/login/`, request)
         .then(({ data }) => {
           if(data.type == 'success'){
             let token = data.response.token
+            this.loading = false
             this.$router.push('/dash')
             Cookies.set('jwt-token', token, { expires: 1 })
+          } else {
+            this.loading = false
+            alert('Erro ao tentar entrar')
           }
 
         })

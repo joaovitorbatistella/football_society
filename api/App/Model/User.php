@@ -56,7 +56,7 @@ class User
      * @param $login
      * @return int
      */
-    public function getRegistroByLogin($login)
+    public function getRegisterByLogin($login)
     {
         $sql = 'SELECT * FROM ' . self::TABLE . ' WHERE login = :login';
         $stmt = $this->Conn->getDb()->prepare($sql);
@@ -64,6 +64,20 @@ class User
         $stmt->execute();
         return $stmt->rowCount();
     }
+
+    /**
+     * @param $username
+     * @return int
+     */
+    public function getUserByUsernae($username)
+    {
+        $sql = 'SELECT * FROM ' . self::TABLE . ' WHERE nome_de_usuario = :username';
+        $stmt = $this->Conn->getDb()->prepare($sql);
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+    
 
     /**
      * @param $login

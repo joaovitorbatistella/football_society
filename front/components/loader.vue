@@ -1,7 +1,6 @@
 <template>
     <v-dialog
       v-model="dialog"
-      hide-overlay
       persistent
       width="300"
     >
@@ -10,7 +9,7 @@
         dark
       >
         <v-card-text>
-          Carregando
+          {{ message+'...' }}
           <v-progress-linear
             indeterminate
             color="white"
@@ -29,6 +28,12 @@ export default {
       type: Boolean,
       default: false
     },
+    message: {
+      type: String,
+    },
+  },
+  beforeMount() {
+    console.log(this.message)
   }
 }
 </script>

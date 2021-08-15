@@ -8,7 +8,7 @@
           marginTop: '3vh'
         }"
       >
-        <a :style="{ textDecoration: 'none', color: 'white' }" href=""><h1>DASHBOARD</h1></a>
+        <a :style="{ textDecoration: 'none', color: 'white' }"><h1>DASHBOARD</h1></a>
 
         <v-row justify="center" align="center" >
           <v-col justify="center" align="center" cols="12" sm="4" md="4">
@@ -19,7 +19,7 @@
                 margin: '23px'
               }"
             >
-              <a :style="{ textDecoration: 'none', color: 'white' }" href=""><h1>JOGOS</h1></a>
+              <a :style="{ textDecoration: 'none', color: 'white' }" href="/game"><h1>JOGOS</h1></a>
               <v-divider></v-divider>
               <v-data-table
                 height="100%"
@@ -59,7 +59,7 @@
                 margin: '23px'
               }"
             >
-              <a :style="{ textDecoration: 'none', color: 'white' }" href=""><h1>CLIENTES</h1></a>
+              <a :style="{ textDecoration: 'none', color: 'white' }" href="/customer"><h1>CLIENTES</h1></a>
               <v-divider></v-divider>
               <v-data-table
                 height="100%"
@@ -85,7 +85,7 @@
                 margin: '23px'
               }"
             >
-              <a :style="{ textDecoration: 'none', color: 'white' }" href=""><h1>PRODUTOS</h1></a>
+              <a :style="{ textDecoration: 'none', color: 'white' }" href="/product"><h1>PRODUTOS</h1></a>
               <v-divider></v-divider>
               <v-data-table
                 height="100%"
@@ -105,7 +105,7 @@
                 margin: '23px'
               }"
             >
-              <a :style="{ textDecoration: 'none', color: 'white' }" href=""><h1>FORNECEDORES</h1></a>
+              <a :style="{ textDecoration: 'none', color: 'white' }" href="/provider"><h1>FORNECEDORES</h1></a>
               <v-divider></v-divider>
               <v-data-table
                 height="100%"
@@ -125,7 +125,7 @@
                 margin: '23px'
               }"
             >
-              <a :style="{ textDecoration: 'none', color: 'white' }" href=""><h1>USUÁRIOS</h1></a>
+              <a :style="{ textDecoration: 'none', color: 'white' }" href="/users"><h1>USUÁRIOS</h1></a>
               <v-divider></v-divider>
               <v-data-table
                 height="100%"
@@ -142,6 +142,7 @@
       </v-col>
     </v-row>
     <loader
+      :message="loaderMessage"
       :dialog="loading"
     />
   </v-container>
@@ -161,6 +162,7 @@ export default {
   data () {
     return {
       loading: false,
+      loaderMessage: 'Carregando',
       gamesList: [],
       gamesHeaders: [
         { text: 'Horário', value: 'data_hora' },
@@ -212,9 +214,13 @@ export default {
       this.$axios
         .get(`users/list/`, config)
         .then(({ data }) => {
-          this.usersList = data.response
-          console.log(this.usersList)
-          this.loading = false
+          if(data.type == 'success') {
+            this.usersList = data.response
+            this.loading = false
+          } else {
+            this.loading = false
+            alert('Erro ao tentar sair')
+          }
         })
         .catch(err => {
           console.log('error on GET: ', err)
