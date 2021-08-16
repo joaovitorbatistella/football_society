@@ -40,7 +40,7 @@ class DBConnection
      */
     public function delete($table, $id)
     {
-        $sqlDelete = 'DELETE FROM ' . $table . ' WHERE id = :id';
+        $sqlDelete = 'DELETE FROM ' . $table . ' WHERE codigo = :id';
         if ($table && $id) {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare($sqlDelete);

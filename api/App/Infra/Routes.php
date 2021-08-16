@@ -9,12 +9,13 @@ class Routes
      */
     public static function getRoutes()
     {
-        $urls = self::getUrls();
-
+        $response = self::getUrls();
+        $urls = $response['uri'];
         $request = [];
         $request['route'] = strtoupper($urls[0]);
         $request['resource'] = $urls[1] ?? null;
         $request['id'] = $urls[2] ?? null;
+        $request['params'] = $response['params'] ?? null;
         $request['method'] = $_SERVER['REQUEST_METHOD'];
         return $request;
     }
@@ -25,7 +26,11 @@ class Routes
     public static function getUrls()
     {
 
-        $uri = str_replace('/' . DIR_PROJECT, '', $_SERVER['REQUEST_URI']);
-        return explode('/', trim($uri, '/'));
+        $request = str_replace('/' . DIR_PROJECT, '', $_SERVER['REQUEST_URI']);
+        $request =  explode('?', $request);
+        $response = [];
+        $response['uri'] =  explode('/', trim($request[0], '/'));
+        $response['params'] = $request[1];
+        return $response;
     }
 }

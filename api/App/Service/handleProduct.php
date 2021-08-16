@@ -3,79 +3,36 @@
 namespace Service;
 
 use InvalidArgumentException;
-use Model\User;
+use Model\Product;
 use Model\AuthorizationToken;
 use Infra\GenericConsts;
 
-class handleUser
+class handleProduct
 {
-    public const TABLE = 'users';
+    public const TABLE = 'produto';
     public const GET_RESOURCES = ['list', 'filterByName'];
     public const POST_RESOURCES = ['store'];
-    public const LOGIN_RESOURCES = ['login'];
-    public const LOGOUT_RESOURCES = ['logout'];
     public const DELETE_RESOURCES = ['delete'];
     public const PUT_RESOURCES = ['update'];
 
     private array $data;
     private array $bodyDataRequests;
     /**
-     * @var object|User
+     * @var object|Product
      */
-    private object $User;
+    private object $Product;
     private object $AuthorizationToken;
 
     /**
-     * handleUser constructor.
+     * handleProduct constructor.
      * @param array $data
      */
     public function __construct($data = [])
     {
         $this->data = $data;
-        $this->User = new User();
+        $this->Product = new Product();
         $this->AuthorizationToken = new AuthorizationToken();
     }
-
-    /**
-     * @return mixed
-     */
-    public function validateLogin()
-    {
-        $return = null;
-        $resource = $this->data['resource'];
-        if (in_array($resource, self::LOGIN_RESOURCES, true)) {
-            $return = $this->$resource();
-        } else {
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
-        }
-
-        if ($return === null) {
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
-        }
-
-        return $return;
-    }
-
-     /**
-     * @return mixed
-     */
-    public function validateLogout()
-    {
-        $return = null;
-        $resource = $this->data['resource'];
-        if (in_array($resource, self::LOGOUT_RESOURCES, true)) {
-            $return = $this->$resource();
-        } else {
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
-        }
-
-        if ($return === null) {
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
-        }
-
-        return $return;
-    }
-    
 
     /**
      * @return mixed
@@ -86,7 +43,7 @@ class handleUser
         $resource = $this->data['resource'];
         if (in_array($resource, self::GET_RESOURCES, true)) {
             if( $this->data['params'] != null){
-                $return = $this->data['id'] > 0 ? $this->getOneByKey() : $this->filterByName( $this->data['params']);
+                $return = $this->data['id'] > 0 ? $this->getOneByKey() : $this->filterByParams( $this->data['params']);
             } else {
                 $return = $this->data['id'] > 0 ? $this->getOneByKey() : $this->$resource();
             }
@@ -181,53 +138,28 @@ class handleUser
     /**
      * @return mixed
      */
-    private function login()
-    {
-        [$username, $password] = [$this->bodyDataRequests['username'], $this->bodyDataRequests['password']];
-
-        if ($username && $password) {
-            if ($this->User->handleLogin($username, $password) > 0) {
-                $token = $this->AuthorizationToken->generateToken($username, $password);
-                return ['token' => $token];
-            }
-
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
-        }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_SENHA_OBRIGATORIO);
-    }
-
-      /**
-     * @return mixed
-     */
-    private function logout()
-    {
-        $token = getallheaders()['Authorization'];
-        $token = $this->AuthorizationToken->getOneByToken($token);
-        $this->AuthorizationToken->destroyById($token['id']);
-        return ['destroyedToken' => $token];
-    }
-
-    /**
-     * @return mixed
-     */
     private function list()
     {
-        return $this->User->getAllUsers(self::TABLE);
+        return $this->Product->getAllProduct(self::TABLE);
     }
 
     /**
-     * @param $username
+     * @param $data
      * @return mixed
      */
-    private function filterByName($data)
+    private function filterByParams($data)
     {
         $var = explode('&', $data);
         $params=[];
         for($i=0; $i < count($var); $i++) {
             $params[$i] = $var[$i];
         }
-        $param = explode('=', $params[0]);
-        return $this->User->getUserByUsername($param[1]);
+        for($i=0; $i < count($params); $i++) {
+          $params[$i] = str_replace('%20', ' ', $params[$i]);
+          $params[$i] = str_replace('%40', '@', $params[$i]);
+        }
+        $param= explode('=', $params[0]);
+        return $this->Product->getProductByParams($param);
     }
 
     /**
@@ -238,21 +170,14 @@ class handleUser
         return $this->User->getConn()->getOneByKey(self::TABLE, $this->data['id']);
     }
 
-    /**
-     * @return array
-     */
     private function store()
     {
-        [$name, $username, $password] = [$this->bodyDataRequests['name'], $this->bodyDataRequests['username'], $this->bodyDataRequests['password']];
+        [$name, $description, $price, $inventory] = [$this->bodyDataRequests['name'], $this->bodyDataRequests['description'], $this->bodyDataRequests['price'], $this->bodyDataRequests['inventory']];
 
-        if ($name && $username && $password) {
-            if ($this->User->getRegisterByLogin($username) > 0) {
-                throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_EXISTENTE);
-            }
-
-            if ($this->User->insertUser($name, $username, $password) > 0) {
-                $insertedId = $this->User->getConn()->getDb()->lastInsertId();
-                $this->User->getConn()->getDb()->commit();
+        if ($name && $description && $price && $inventory) {
+            if ($this->Product->insertProduct($name, $description, $price, $inventory) > 0) {
+                $insertedId = $this->Product->getConn()->getDb()->lastInsertId();
+                $this->Product->getConn()->getDb()->commit();
                 return ['insertedId' => $insertedId];
             }
 
@@ -268,7 +193,7 @@ class handleUser
      */
     private function delete()
     {
-        return $this->User->getConn()->delete(self::TABLE, $this->data['id']);
+        return $this->Product->getConn()->delete(self::TABLE, $this->data['id']);
     }
 
     /**
@@ -276,11 +201,11 @@ class handleUser
      */
     private function update()
     {
-        if ($this->User->updateUser($this->data['id'], $this->bodyDataRequests) > 0) {
-            $this->User->getConn()->getDb()->commit();
+        if ($this->Product->updateProduct($this->data['id'], $this->bodyDataRequests) > 0) {
+            $this->Product->getConn()->getDb()->commit();
             return GenericConsts::MSG_ATUALIZADO_SUCESSO;
         }
-        $this->User->getConn()->getDb()->rollBack();
+        $this->Product->getConn()->getDb()->rollBack();
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 

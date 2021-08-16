@@ -19,28 +19,29 @@ ___
 
 * Requisitos: 
   - [x] __GET:__ Mostrar todos os usuários __" /users/list "__
-  - [ ] __GET:__ Mostrar usuários filtrando pelo nome de usuário
-  - [ ] __POST:__ Inserir um novo usuário
-  - [ ] __PUT:__ Editar um produto, passando seu ID
-  - [ ] __DELETE:__ Excluir um produto passando seu ID
+  - [x] __GET:__ Mostrar usuários filtrando pelo nome de usuário
+  - [x] __GET:__ Mostrar usuário por código
+  - [x] __POST:__ Inserir um novo usuário
+  - [x] __PUT:__ Editar um produto, passando seu ID
+  - [x] __DELETE:__ Excluir um produto passando seu ID
   ___
 
 #### Produto
 
 * Requisitos: 
-  - [ ] __GET:__ Mostrar todos os produtos
-  - [ ] __GET:__ Mostrar produtos filtrando pelo nome
-  - [ ] __POST:__ Inserir um novo produto
-  - [ ] __PUT:__ Editar um produto, passando seu ID
-  - [ ] __DELETE:__ Excluir um produto passando seu ID
+  - [x] __GET:__ Mostrar todos os produtos
+  - [x] __GET:__ Mostrar produtos filtrando pelo nome ou codigo
+  - [x] __POST:__ Inserir um novo produto
+  - [x] __PUT:__ Editar um produto, passando seu ID
+  - [x] __DELETE:__ Excluir um produto passando seu ID
   ___
 
 #### Cliente
 
 * Requisitos: 
-  - [ ] __GET:__ Mostrar todos os clientes, __(JOIN na tabela cidade)__
-  - [ ] __GET:__ Mostrar clientes filtrando pelo nome, cpf ou email
-  - [ ] __POST:__ Inserir um novo cliente
+  - [x] __GET:__ Mostrar todos os clientes, __(JOIN na tabela cidade)__
+  - [X] __GET:__ Mostrar clientes filtrando pelo nome, cpf ou email
+  - [X] __POST:__ Inserir um novo cliente
   - [ ] __PUT:__ Editar um cliente, passando seu ID
   - [ ] __DELETE:__ Excluir um cliente passando seu ID
   ___

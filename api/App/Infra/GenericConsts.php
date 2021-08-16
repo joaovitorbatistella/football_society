@@ -6,10 +6,10 @@ abstract class GenericConsts
 {
     /* REQUESTS */
     public const REQUEST_TYPES = ['GET', 'POST', 'DELETE', 'PUT'];
-    public const GET_TYPE = ['USERS', 'ATTENDANCE'];
-    public const POST_TYPE = ['USERS', 'ATTENDANCE'];
-    public const DELETE_TYPE = ['USERS', 'ATTENDANCE'];
-    public const PUT_TYPE = ['USERS', 'ATTENDANCE'];
+    public const GET_TYPE = ['USERS', 'ATTENDANCE', 'PRODUCT', 'CUSTOMER'];
+    public const POST_TYPE = ['USERS', 'ATTENDANCE', 'PRODUCT', 'CUSTOMER'];
+    public const DELETE_TYPE = ['USERS', 'ATTENDANCE', 'PRODUCT', 'CUSTOMER'];
+    public const PUT_TYPE = ['USERS', 'ATTENDANCE', 'PRODUCT', 'CUSTOMER'];
 
     /* ERRORS */
     public const MSG_ERROR_ROUTER_TYPE = 'Rota não permitida!';
@@ -30,6 +30,7 @@ abstract class GenericConsts
     public const MSG_ERRO_ID_OBRIGATORIO = 'ID é obrigatório!';
     public const MSG_ERRO_LOGIN_EXISTENTE = 'Login já existente!';
     public const MSG_ERRO_LOGIN_SENHA_OBRIGATORIO = 'Login e Senha são obrigatórios!';
+    public const MSG_ERROR_EMPTY_FIELDS = 'Nome, nome de usuário e senha sao obrigatorios!';
 
     /* RETORNO JSON */
     const SUCCESS_TYPE = 'success';

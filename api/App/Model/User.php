@@ -35,6 +35,10 @@ class User
         return $stmt->rowCount();
     }
 
+    /**
+     * @param $table
+     * @return Array
+     */
     public function getAllUsers($table)
     {
         if ($table) {
@@ -69,46 +73,52 @@ class User
      * @param $username
      * @return int
      */
-    public function getUserByUsernae($username)
+    public function getUserByUsername($username)
     {
-        $sql = 'SELECT * FROM ' . self::TABLE . ' WHERE nome_de_usuario = :username';
-        $stmt = $this->Conn->getDb()->prepare($sql);
-        $stmt->bindParam(':username', $username);
-        $stmt->execute();
-        return $stmt->rowCount();
+        $sql = "SELECT codigo, nome, nome_de_usuario FROM " . self::TABLE . " WHERE nome_de_usuario = '". $username."'";
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
     }
     
 
     /**
-     * @param $login
-     * @param $senha
+     * @param $name
+     * @param $username
+     * @param $password
      * @return int
      */
-    public function insertUser($login, $senha)
+    public function insertUser($name, $username, $password)
     {
-        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (login, senha) VALUES (:login, :senha)';
+        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (nome, nome_de_usuario, senha) VALUES (:name, :username, :password)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);
-        $stmt->bindParam(':login', $login);
-        $stmt->bindParam(':senha', $senha);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':password', $password);
         $stmt->execute();
         return $stmt->rowCount();
     }
 
     /**
      * @param $id
-     * @param $login
-     * @param $senha
+     * @param $data
      * @return int
      */
-    public function updateUser($id, $dados)
+    public function updateUser($id, $data)
     {
-        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET login = :login, senha = :senha WHERE id = :id';
+        $id = (int)$id;
+        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET nome = :name, nome_de_usuario = :username, senha = :password WHERE codigo = :id';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
         $stmt->bindParam(':id', $id);
-        $stmt->bindValue(':login', $dados['login']);
-        $stmt->bindValue(':senha', $dados['senha']);
+        $stmt->bindValue(':name', $data['name']);
+        $stmt->bindValue(':username', $data['username']);
+        $stmt->bindValue(':password', $data['password']);
         $stmt->execute();
         return $stmt->rowCount();
     }

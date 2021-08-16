@@ -3,6 +3,9 @@
 namespace Model;
 
 use database\DBConnection;
+use PDO;
+use InvalidArgumentException;
+use Infra\GenericConsts;
 
 class Product
 {
@@ -16,6 +19,49 @@ class Product
     {
         $this->Conn = new DBConnection();
     }
+
+    /**
+     * @param $table
+     * @return Array
+     */
+    public function getAllProduct($table)
+    {
+        if ($table) {
+            $sql = 'SELECT * FROM ' . $table;
+            $stmt = $this->getConn()->getDb()->query($sql);
+            if($stmt) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
+            }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+    }
+
+    /**
+     * @param $param
+     * @return int
+     */
+    public function getProductByParams($param)
+    {
+        if($param[0] == 'name'){
+            $sql = "SELECT * FROM " . self::TABLE ." WHERE nome LIKE '%".$param[1]."%'";
+        } else if($param[0] == 'id'){
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $param[1];
+        }
+        
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
+    }
+    
 
     /**
      * @param $name
@@ -34,7 +80,6 @@ class Product
         $stmt->bindParam(':price', $price);
         $stmt->bindParam(':inventory', $inventory);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt;
     }
 
@@ -58,7 +103,6 @@ class Product
         $stmt->bindValue(':price', $data['price']);
         $stmt->bindValue(':inventory', $data['inventory']);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt->rowCount();
     }
 

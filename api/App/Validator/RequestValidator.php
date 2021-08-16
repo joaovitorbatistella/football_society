@@ -5,6 +5,8 @@ namespace Validator;
 use InvalidArgumentException;
 use Model\AuthorizationToken;
 use Service\handleUser;
+use Service\handleProduct;
+use Service\handleCustomer;
 use Service\handleAttendance;
 use Infra\GenericConsts;
 use Infra\Json;
@@ -19,6 +21,8 @@ class RequestValidator
     const DELETE = 'DELETE';
     const POST = 'POST';
     const USERS = 'USERS';
+    const PRODUCT = 'PRODUCT';
+    const CUSTOMER = 'CUSTOMER';
     const ATTENDANCE = 'ATTENDANCE';
 
     /**
@@ -68,17 +72,122 @@ class RequestValidator
     }
 
     /**
+     * Metodo para tratar os GETS
+     * @return array|mixed|string
+     */
+    private function get()
+    {
+        $return = utf8_encode(GenericConsts::MSG_ERROR_ROUTER_TYPE);
+        if (in_array($this->request['route'], GenericConsts::GET_TYPE, true)) {
+            switch ($this->request['route']) {
+                case self::USERS:
+                    $handleUser = new handleUser($this->request);
+                    $return = $handleUser->validateGet();
+                    break;
+                case self::PRODUCT:
+                    $handleProduct = new handleProduct($this->request);
+                    $return = $handleProduct->validateGet();
+                    break;
+                case self::CUSTOMER:
+                    $handleCustomer = new handleCustomer($this->request);
+                    $return = $handleCustomer->validateGet();
+                    break;
+                case self::ATTENDANCE:
+                    $handleAttendance = new handleAttendance($this->request);
+                    $return = $handleAttendance->validateGet();
+                    break;
+                default:
+                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Metodo para tratar os POSTS
+     * @return array|null|string
+     */
+    private function post()
+    {
+        $return = null;
+        if (in_array($this->request['route'], GenericConsts::POST_TYPE, true)) {
+            switch ($this->request['route']) {
+                case self::USERS:
+                    $handleUser = new handleUser($this->request);
+                    $handleUser->setBodyDataRequests($this->requestData);
+                    $return = $handleUser->validatePost();
+                    break;
+                case self::PRODUCT:
+                    $handleProduct = new handleProduct($this->request);
+                    $handleProduct->setBodyDataRequests($this->requestData);
+                    $return = $handleProduct->validatePost();
+                    break;
+                case self::CUSTOMER:
+                    $handleCustomer = new handleCustomer($this->request);
+                    $handleCustomer->setBodyDataRequests($this->requestData);
+                    $return = $handleCustomer->validatePost();
+                    break;
+                case self::ATTENDANCE:
+                    $handleAttendance = new handleAttendance($this->request);
+                    $handleAttendance->setBodyDataRequests($this->requestData);
+                    $return = $handleAttendance->validatePost();
+                    break;
+                default:
+                    throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
+            }
+            return $return;
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
+    }
+
+    /**
+     * Metodo para tratar os PUTS
+     * @return array|null|string
+     */
+    private function put()
+    {
+        $return = null;
+        if (in_array($this->request['route'], GenericConsts::PUT_TYPE, true)) {
+            switch ($this->request['route']) {
+                case self::USERS:
+                    $handleUser = new handleUser($this->request);
+                    $handleUser->setBodyDataRequests($this->requestData);
+                    $return = $handleUser->validatePut();
+                    break;
+                case self::PRODUCT:
+                    $handleProduct = new handleProduct($this->request);
+                    $handleProduct->setBodyDataRequests($this->requestData);
+                    $return = $handleProduct->validatePut();
+                    break;
+                case self::ATTENDANCE:
+                    $handleAttendance = new handleAttendance($this->request);
+                    $handleAttendance->setBodyDataRequests($this->requestData);
+                    $return = $handleAttendance->validatePut();
+                    break;
+                default:
+                    throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
+            }
+            return $return;
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
+    }
+
+     /**
      * Metodo para tratar os DELETES
      * @return mixed|string
      */
     private function delete()
     {
-        $return = utf8_encode(GenericConsts::MSG_ERRO_TIPO_ROTA);
+        $return = utf8_encode(GenericConsts::MSG_ERROR_ROUTER_TYPE);
         if (in_array($this->request['route'], GenericConsts::DELETE_TYPE, true)) {
             switch ($this->request['route']) {
                 case self::USERS:
                     $handleUser = new handleUser($this->request);
                     $return = $handleUser->validateDelete();
+                    break;
+                case self::PRODUCT:
+                    $handleProduct = new handleProduct($this->request);
+                    $return = $handleProduct->validateDelete();
                     break;
                 case self::ATTENDANCE:
                     $handleAttendance = new handleAttendance($this->request);
@@ -106,11 +215,11 @@ class RequestValidator
                     $return = $handleUser->validatelogin();
                     break;
                 default:
-                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
+                    throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
             }
             return $return;
         }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
+        throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
     }
 
     /**
@@ -131,83 +240,5 @@ class RequestValidator
             }
         }
         return $return;
-    }
-
-    /**
-     * Metodo para tratar os GETS
-     * @return array|mixed|string
-     */
-    private function get()
-    {
-        $return = utf8_encode(GenericConsts::MSG_ERROR_ROUTER_TYPE);
-        if (in_array($this->request['route'], GenericConsts::GET_TYPE, true)) {
-            switch ($this->request['route']) {
-                case self::USERS:
-                    $handleUser = new handleUser($this->request);
-                    $return = $handleUser->validateGet();
-                    break;
-                case self::ATTENDANCE:
-                    $handleAttendance = new handleAttendance($this->request);
-                    $return = $handleAttendance->validateGet();
-                    break;
-                default:
-                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
-            }
-        }
-        return $return;
-    }
-
-    /**
-     * Metodo para tratar os POSTS
-     * @return array|null|string
-     */
-    private function post()
-    {
-        $return = null;
-        if (in_array($this->request['route'], GenericConsts::POST_TYPE, true)) {
-            switch ($this->request['route']) {
-                case self::USERS:
-                    $handleUser = new handleUser($this->request);
-                    $handleUser->setBodyDataRequests($this->requestData);
-                    $return = $handleUser->validatePost();
-                    break;
-                case self::ATTENDANCE:
-                    $handleAttendance = new handleAttendance($this->request);
-                    $handleAttendance->setBodyDataRequests($this->requestData);
-                    $return = $handleAttendance->validatePost();
-                    break;
-                default:
-                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
-            }
-            return $return;
-        }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
-    }
-
-    /**
-     * Metodo para tratar os PUTS
-     * @return array|null|string
-     */
-    private function put()
-    {
-        $return = null;
-        if (in_array($this->request['route'], GenericConsts::PUT_TYPE, true)) {
-            switch ($this->request['route']) {
-                case self::USERS:
-                    $handleUser = new handleUser($this->request);
-                    $handleUser->setBodyDataRequests($this->requestData);
-                    $return = $handleUser->validatePut();
-                    break;
-                case self::ATTENDANCE:
-                    $handleAttendance = new handleAttendance($this->request);
-                    $handleAttendance->setBodyDataRequests($this->requestData);
-                    $return = $handleAttendance->validatePut();
-                    break;
-                default:
-                    throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
-            }
-            return $return;
-        }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_TIPO_ROTA);
     }
 }
