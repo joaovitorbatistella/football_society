@@ -44,7 +44,7 @@ ___
 
 * Requisitos:
   * [x] __GET:__ Mostrar todos os clientes, __(JOIN na tabela cidade)__
-  * [ ] __GET:__ Mostrar clientes filtrando pelo nome, cpf ou email
+  * [x] __GET:__ Mostrar clientes filtrando pelo nome, cpf ou email
   * [X] __POST:__ Inserir um novo cliente
   * [x] __PUT:__ Editar um cliente, passando seu ID
   * [x] __DELETE:__ Excluir um cliente passando seu ID
@@ -53,7 +53,7 @@ ___
 #### Fornecedor
 
 * Requisitos:
-  * [ ] __GET:__ Mostrar todos os fornecedores, __(JOIN na tabela cidade)__
+  * [x] __GET:__ Mostrar todos os fornecedores, __(JOIN na tabela cidade)__
   * [x] __GET:__ Mostrar fornecedores filtrando pelo nome
   * [x] __POST:__ Inserir um novo fornecedor
   * [x] __PUT:__ Editar um fornecedor, passando seu ID
@@ -63,7 +63,7 @@ ___
 #### Atendimento
 
 * Requisitos:
-  * [ ] __GET:__ Mostrar todos os atendimentos, __(JOIN na tabela cidade)__
+  * [x] __GET:__ Mostrar todos os atendimentos, __(JOIN na tabela cidade)__
   * [x] __GET:__ Mostrar atendimentos filtrando pela data
   * [x] __POST:__ Inserir um novo fornecedor
   * [x] __PUT:__ Editar um fornecedor, passando seu ID
@@ -73,9 +73,9 @@ ___
 #### Jogo
 
 * Requisitos:
-  * [ ] __GET:__ Mostrar todos os jogos, __(JOIN na tabela atendimento)__
+  * [x] __GET:__ Mostrar todos os jogos, __(JOIN na tabela atendimento)__
   * [x] __GET:__ Mostrar jogos filtrando pelo horário
   * [x] __POST:__ Inserir um novo jogo
-  * [ ] __PUT:__ Editar um jogo, passando seu ID
-  * [ ] __DELETE:__ Excluir um jogo passando seu ID
+  * [x] __PUT:__ Editar um jogo, passando seu ID
+  * [x] __DELETE:__ Excluir um jogo passando seu ID
   ___

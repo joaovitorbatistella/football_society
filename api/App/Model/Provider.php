@@ -25,7 +25,7 @@ class Provider
     public function getAllProviders($table)
     {
         if ($table) {
-            $sql = 'SELECT * FROM ' . $table;
+            $sql = "SELECT f.codigo, f.nome, f.logradouro, f.telefone, ci.nome AS nome_cidade, ci.uf FROM fornecedor f INNER JOIN cidade ci ON f.cod_cidade = ci.codigo";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);

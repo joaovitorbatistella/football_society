@@ -27,7 +27,7 @@ class Game
     public function getAllGames($table)
     {
         if ($table) {
-            $sql = 'SELECT * FROM ' . $table;
+            $sql = "SELECT j.data_hora, j.valor, j.descricao, j.desconto, a.descricao AS descricao_atendimento, cl.nome AS nome_cliente FROM jogo j INNER JOIN atendimento a ON j.cod_atendimento = a.codigo INNER JOIN cliente cl ON a.cod_cliente = cl.codigo";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -90,24 +90,39 @@ class Game
     }
 
     /**
-     * @param $id
-     * @param $name
-     * @param $address
-     * @param $telephone
-     * @param $cityId
-     * @param $data
+     * @param $oldDateAndTime
+     * @param $newDateAndTime
+     * @param $price
+     * @param $description
+     * @param $discount
+     * @param $attendanceId
      * @return int
      */
-    public function updateProvider($id, $data)
+    public function updateGame($data)
     {
-        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET nome = :name, logradouro = :address, telefone = :telephone, cod_cidade = :cityId WHERE codigo = :id';
+        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET data_hora = :newDateAndTime, valor = :price, descricao = :description, desconto = :discount, cod_atendimento = :attendanceId WHERE data_hora = :oldDateAndTime';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
-        $stmt->bindParam(':id', $id);
-        $stmt->bindValue(':name', $data['name']);
-        $stmt->bindValue(':address', $data['address']);
-        $stmt->bindValue(':telephone', $data['telephone']);
-        $stmt->bindValue(':cityId', $data['cityId']);
+        $stmt->bindParam(':oldDateAndTime', $data['oldDateAndTime']);
+        $stmt->bindParam(':newDateAndTime', $data['newDateAndTime']);
+        $stmt->bindParam(':price', $data['price']);
+        $stmt->bindParam(':description', $data['description']);
+        $stmt->bindParam(':discount', $data['discount']);
+        $stmt->bindParam(':attendanceId', $data['attendanceId']);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @param $dateAndTime
+     * @return int
+     */
+    public function deleteGame($data)
+    {
+        $sqlDelete = 'DELETE FROM ' . self::TABLE . ' WHERE data_hora = :dateAndTime';
+        $this->Conn->getDb()->beginTransaction();
+        $stmt = $this->Conn->getDb()->prepare($sqlDelete);
+        $stmt->bindParam(':dateAndTime', $data['dateAndTime']);
         $stmt->execute();
         return $stmt->rowCount();
     }

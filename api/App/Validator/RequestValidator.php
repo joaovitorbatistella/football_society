@@ -63,7 +63,10 @@ class RequestValidator
         } else if ($this->request['route'] === 'USERS' && $this->request['resource'] === 'logout' && $this->request['method'] === 'GET'){
             $method = $this->request['method'].'logout';
             $this->AuthorizationToken->validToken(getallheaders()['Authorization']);
-        } else {
+        } else if ($this->request['route'] === 'GAME' && $this->request['resource'] === 'delete' && $this->request['method'] === 'DELETE'){
+                $this->requestData = Json::handleBodyRequest();
+                $method = $this->request['method'];
+        }else {
             if ($this->request['method'] !== self::GET && $this->request['method'] !== self::DELETE) {
                 $this->requestData = Json::handleBodyRequest();
                 $method = $this->request['method'];
@@ -240,6 +243,7 @@ class RequestValidator
                     break;
                 case self::GAME:
                     $handleGame = new handleGame($this->request);
+                    $handleGame->setBodyDataRequests($this->requestData);
                     $return = $handleGame->validateDelete();
                     break;
                 default:

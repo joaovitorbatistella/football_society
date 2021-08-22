@@ -25,7 +25,7 @@ class Attendance
     public function getAllAttendances($table)
     {
         if ($table) {
-            $sql = 'SELECT * FROM ' . $table;
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente FROM atendimento a INNER JOIN cliente cl ON a.cod_cliente = cl.codigo";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);

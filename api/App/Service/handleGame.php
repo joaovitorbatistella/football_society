@@ -66,11 +66,7 @@ class handleGame
         $return = null;
         $resource = $this->data['resource'];
         if (in_array($resource, self::DELETE_RESOURCES, true)) {
-            if ($this->data['id'] > 0) {
-                $return = $this->$resource();
-            } else {
-                throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
-            }
+            $return = $this->$resource();
         } else {
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
         }
@@ -110,11 +106,7 @@ class handleGame
         $return = null;
         $resource = $this->data['resource'];
         if (in_array($resource, self::PUT_RESOURCES, true)) {
-            if ($this->data['id'] > 0) {
-                $return = $this->$resource();
-            } else {
-                throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
-            }
+            $return = $this->$resource();
         } else {
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
         }
@@ -214,7 +206,12 @@ class handleGame
      */
     private function delete()
     {
-        return $this->Game->getConn()->delete(self::TABLE, $this->data['id']);
+        if ($this->Game->deleteGame($this->bodyDataRequests) > 0) {
+            $this->Game->getConn()->getDb()->commit();
+            return GenericConsts::MSG_DELETADO_SUCESSO;
+        }
+        $this->Game->getConn()->getDb()->rollBack();
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 
     /**
@@ -222,7 +219,7 @@ class handleGame
      */
     private function update()
     {
-        if ($this->Game->updateGame($this->data['id'], $this->bodyDataRequests) > 0) {
+        if ($this->Game->updateGame($this->bodyDataRequests) > 0) {
             $this->Game->getConn()->getDb()->commit();
             return GenericConsts::MSG_ATUALIZADO_SUCESSO;
         }
