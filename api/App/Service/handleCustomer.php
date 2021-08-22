@@ -157,6 +157,7 @@ class handleCustomer
         for($i=0; $i < count($params); $i++) {
             $params[$i] = str_replace('%20', ' ', $params[$i]);
             $params[$i] = str_replace('%40', '@', $params[$i]);
+            $params[$i] = str_replace('+', ' ', $params[$i]);
         }
         $param= explode('=', $params[0]);
         return $this->Customer->getCustomerByParams($param);

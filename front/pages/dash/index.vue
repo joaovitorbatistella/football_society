@@ -15,7 +15,8 @@
             <v-layout align-top justify-top column :style="{
                 backgroundColor: '#212121',
                 borderRadius: '8px',
-                height: '30vh',
+                minHeight: '30vh',
+                maxHeight: '100%',
                 margin: '23px'
               }"
             >
@@ -25,7 +26,7 @@
                 height="100%"
                 :headers="gamesHeaders"
                 :items="gamesList"
-                :items-per-page="5"
+                :items-per-page="3"
                 class="elevation-1"
               ></v-data-table>
               
@@ -35,7 +36,8 @@
             <v-layout align-top justify-top column :style="{
                 backgroundColor: '#212121',
                 borderRadius: '8px',
-                height: '30vh',
+                minHeight: '30vh',
+                maxHeight: '100%',
                 margin: '23px'
               }"
             >
@@ -45,7 +47,7 @@
                 height="100%"
                 :headers="attendancesHeaders"
                 :items="attendancesList"
-                :items-per-page="5"
+                :items-per-page="3"
                 class="elevation-1"
               ></v-data-table>
               
@@ -55,7 +57,8 @@
             <v-layout align-top justify-top column :style="{
                 backgroundColor: '#212121',
                 borderRadius: '8px',
-                height: '30vh',
+                minHeight: '30vh',
+                maxHeight: '100%',
                 margin: '23px'
               }"
             >
@@ -65,7 +68,7 @@
                 height="100%"
                 :headers="customersHeaders"
                 :items="customersList"
-                :items-per-page="5"
+                :items-per-page="3"
                 class="elevation-1"
               ></v-data-table>
               
@@ -81,7 +84,8 @@
             <v-layout align-top justify-top column :style="{
                 backgroundColor: '#212121',
                 borderRadius: '8px',
-                height: '30vh',
+                minHeight: '30vh',
+                maxHeight: '100%',
                 margin: '23px'
               }"
             >
@@ -91,7 +95,7 @@
                 height="100%"
                 :headers="productsHeaders"
                 :items="productsList"
-                :items-per-page="5"
+                :items-per-page="3"
                 class="elevation-1"
               ></v-data-table>
               
@@ -101,7 +105,8 @@
             <v-layout align-top justify-top column :style="{
                 backgroundColor: '#212121',
                 borderRadius: '8px',
-                height: '30vh',
+                minHeight: '30vh',
+                maxHeight: '100%',
                 margin: '23px'
               }"
             >
@@ -111,7 +116,7 @@
                 height="100%"
                 :headers="providersHeaders"
                 :items="providersList"
-                :items-per-page="5"
+                :items-per-page="3"
                 class="elevation-1"
               ></v-data-table>
               
@@ -121,17 +126,18 @@
             <v-layout align-top justify-top column :style="{
                 backgroundColor: '#212121',
                 borderRadius: '8px',
-                height: '30vh',
+                minHeight: '30vh',
+                maxHeight: '100%',
                 margin: '23px'
               }"
             >
               <a :style="{ textDecoration: 'none', color: 'white' }" href="/users"><h1>USUÁRIOS</h1></a>
               <v-divider></v-divider>
               <v-data-table
-                height="100%"
+                height="85%"
                 :headers="usersHeaders"
                 :items="usersList"
-                :items-per-page="2"
+                :items-per-page="3"
                 class="elevation-1"
               ></v-data-table>
               
@@ -167,7 +173,7 @@ export default {
       gamesHeaders: [
         { text: 'Horário', value: 'data_hora' },
         { text: 'Valor', value: 'valor' },
-        { text: 'Atendimento', value: 'cod_atendimento' },
+        { text: 'Atendimento', value: 'nome_cliente' },
       ],
       attendancesList: [],
       attendancesHeaders: [
@@ -203,8 +209,9 @@ export default {
       ],
     }
   },
-    beforeMount() {
-      let token = Cookies.get('jwt-token')   
+    async beforeMount() {
+      try {
+        let token = Cookies.get('jwt-token')   
       const config = {
           headers: {
             Authorization: 'Bearer '+ token
@@ -216,15 +223,90 @@ export default {
         .then(({ data }) => {
           if(data.type == 'success') {
             this.usersList = data.response
-            this.loading = false
           } else {
             this.loading = false
-            alert('Erro ao tentar sair')
+            alert('Erro ao buscar dados')
           }
         })
         .catch(err => {
           console.log('error on GET: ', err)
         })
+      
+      this.$axios
+        .get(`provider/list/`, config)
+        .then(({ data }) => {
+          if(data.type == 'success') {
+            this.providersList = data.response
+          } else {
+            this.loading = false
+            alert('Erro ao buscar dados')
+          }
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+      
+      this.$axios
+        .get(`product/list/`, config)
+        .then(({ data }) => {
+          if(data.type == 'success') {
+            this.productsList = data.response
+          } else {
+            this.loading = false
+            alert('Erro ao buscar dados')
+          }
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+      
+      this.$axios
+        .get(`customer/list/`, config)
+        .then(({ data }) => {
+          if(data.type == 'success') {
+            this.customersList = data.response
+          } else {
+            this.loading = false
+            alert('Erro ao buscar dados')
+          }
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+      
+      this.$axios
+        .get(`attendance/list/`, config)
+        .then(({ data }) => {
+          if(data.type == 'success') {
+            this.attendancesList = data.response
+          } else {
+            this.loading = false
+            alert('Erro ao buscar dados')
+          }
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+      
+      await this.$axios
+        .get(`game/list/`, config)
+        .then(({ data }) => {
+          if(data.type == 'success') {
+            this.gamesList = data.response
+          } else {
+            this.loading = false
+            alert('Erro ao buscar dados')
+          }
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+      
+      this.loading = false
+      } catch(e) {
+        console.error(e);
+      }
+      
   },
 }
 </script>

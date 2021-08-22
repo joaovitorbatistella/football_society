@@ -150,6 +150,7 @@ class handleGame
             $params[$i] = str_replace('%20', ' ', $params[$i]);
             $params[$i] = str_replace('%3A', ':', $params[$i]);
             $params[$i] = str_replace('%40', '@', $params[$i]);
+            $params[$i] = str_replace('+', ' ', $params[$i]);
         }
         if(count($params) > 1) {
             $startDate= explode('=', $params[0]);
