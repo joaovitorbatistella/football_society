@@ -3,6 +3,7 @@
 namespace Model;
 
 use database\DBConnection;
+use PDO;
 
 class Attendance
 {
@@ -18,28 +19,73 @@ class Attendance
     }
 
     /**
+     * @param $table
+     * @return Array
+     */
+    public function getAllAttendances($table)
+    {
+        if ($table) {
+            $sql = 'SELECT * FROM ' . $table;
+            $stmt = $this->getConn()->getDb()->query($sql);
+            if($stmt) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
+            }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+    }
+
+     /**
+     * @param $param
+     * @return int
+     */
+    public function getAttendanceByParams($param)
+    {
+        if($param[0] == 'id'){
+            $id = (int)$param[1];
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $id;
+        }
+        else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'";
+        } 
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
+    }
+    
+
+    /**
      * @param $description
-     * @param $timestamps
+     * @param $dateAndTime
      * @param $payed
      * @param $customerId
      * @return int
      */
-    public function insertAttendance($description, $timestamps, $payed, $customerId)
+    public function insertAttendance($description, $dateAndTime, $payed, $customerId)
     {
-        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (descricao, data_hora, pago, cod_cliente) VALUES (:description, :timestamps, :customerId)';
+        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (descricao, data_hora, pago, cod_cliente) VALUES (:description, :dateAndTime, :payed, :customerId)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':UF', $UF);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':dateAndTime', $dateAndTime);
+        $stmt->bindParam(':payed', $payed);
+        $stmt->bindParam(':customerId', $customerId);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt;
     }
 
     /**
      * @param $id
      * @param $description
-     * @param $timestamps
+     * @param $dateAndTime
      * @param $payed
      * @param $customerId
      * @param $data
@@ -47,16 +93,15 @@ class Attendance
      */
     public function updateAttendance($id, $data)
     {
-        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET descricao = :description, data_hora = :timestamps, pago = :payed, cod_cliente = :customerId WHERE codigo = :id';
+        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET descricao = :description, data_hora = :dateAndTime, pago = :payed, cod_cliente = :customerId WHERE codigo = :id';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
         $stmt->bindParam(':id', $id);
         $stmt->bindValue(':description', $data['description']);
-        $stmt->bindValue(':timestamps', $data['timestamps']);
+        $stmt->bindValue(':dateAndTime', $data['dateAndTime']);
         $stmt->bindValue(':payed', $data['payed']);
         $stmt->bindValue(':customerId', $data['customerId']);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt->rowCount();
     }
 

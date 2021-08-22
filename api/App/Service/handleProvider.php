@@ -3,13 +3,14 @@
 namespace Service;
 
 use InvalidArgumentException;
-use Model\Attendance;
+use Model\Provider;
+use Model\AuthorizationToken;
 use Infra\GenericConsts;
 
-class handleAttendance
+class handleProvider
 {
-    public const TABLE = 'atendimento';
-    public const GET_RESOURCES = ['list'];
+    public const TABLE = 'fornecedor';
+    public const GET_RESOURCES = ['list', 'filterByName'];
     public const POST_RESOURCES = ['store'];
     public const DELETE_RESOURCES = ['delete'];
     public const PUT_RESOURCES = ['update'];
@@ -17,18 +18,20 @@ class handleAttendance
     private array $data;
     private array $bodyDataRequests;
     /**
-     * @var object|Attendance
+     * @var object|Provider
      */
-    private object $Attendance;
+    private object $Provider;
+    private object $AuthorizationToken;
 
     /**
-     * handleAttendance constructor.
+     * handleProvider constructor.
      * @param array $data
      */
     public function __construct($data = [])
     {
         $this->data = $data;
-        $this->Attendance = new Attendance();
+        $this->Provider = new Provider();
+        $this->AuthorizationToken = new AuthorizationToken();
     }
 
     /**
@@ -129,6 +132,7 @@ class handleAttendance
     public function setBodyDataRequests($bodyDataRequests)
     {
         $this->bodyDataRequests = $bodyDataRequests;
+
     }
 
     /**
@@ -136,7 +140,7 @@ class handleAttendance
      */
     private function list()
     {
-        return $this->Attendance->getAllAttendances(self::TABLE);
+        return $this->Provider->getAllProviders(self::TABLE);
     }
 
     /**
@@ -152,20 +156,10 @@ class handleAttendance
         }
         for($i=0; $i < count($params); $i++) {
             $params[$i] = str_replace('%20', ' ', $params[$i]);
-            $params[$i] = str_replace('%3A', ':', $params[$i]);
             $params[$i] = str_replace('%40', '@', $params[$i]);
         }
-        if(count($params) > 1) {
-            $startDate= explode('=', $params[0]);
-            $endDate= explode('=', $params[1]);
-            $param= [
-                $startDate,
-                $endDate
-            ];
-        } else{
-           $param= explode('=', $params[0]); 
-        }
-        return $this->Attendance->getAttendanceByParams($param);
+        $param= explode('=', $params[0]);
+        return $this->Provider->getProvidersByParams($param);
     }
 
     /**
@@ -173,38 +167,35 @@ class handleAttendance
      */
     private function getOneByKey()
     {
-        return $this->Attendance->getConn()->getOneByKey(self::TABLE, $this->data['id']);
+        return $this->User->getConn()->getOneByKey(self::TABLE, $this->data['id']);
     }
 
-    /**
-     * @return array
-     */
     private function store()
     {
         [
-          $description,
-          $dateAndTime,
-          $payed,
-          $customerId
+            $name,
+            $telephone,
+            $address,
+            $cityId
         ] = [
-          $this->bodyDataRequests['description'],
-          $this->bodyDataRequests['dateAndTime'],
-          $this->bodyDataRequests['payed'],
-          $this->bodyDataRequests['customerId']
+            $this->bodyDataRequests['name'],
+            $this->bodyDataRequests['telephone'],
+            $this->bodyDataRequests['address'],
+            $this->bodyDataRequests['cityId'],
         ];
 
-        if ($description && $dateAndTime && $payed && $customerId) {
-            if ($this->Attendance->insertAttendance($description, $dateAndTime, $payed, $customerId) > 0) {
-                $insertedId = $this->Attendance->getConn()->getDb()->lastInsertId();
-                $this->Attendance->getConn()->getDb()->commit();
+        if ($name && $telephone && $address && $cityId) {
+            if ($this->Provider->insertProvider($name, $address, $telephone, $cityId) > 0) {
+                $insertedId = $this->Provider->getConn()->getDb()->lastInsertId();
+                $this->Provider->getConn()->getDb()->commit();
                 return ['insertedId' => $insertedId];
             }
 
-            $this->Attendance->getConn()->getDb()->rollBack();
+            $this->Provider->getConn()->getDb()->rollBack();
 
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
         }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_SENHA_OBRIGATORIO);
+        throw new InvalidArgumentException(GenericConsts::MSG_ERROR_EMPTY_FIELDS);
     }
 
     /**
@@ -212,7 +203,7 @@ class handleAttendance
      */
     private function delete()
     {
-        return $this->Attendance->getConn()->delete(self::TABLE, $this->data['id']);
+        return $this->Provider->getConn()->delete(self::TABLE, $this->data['id']);
     }
 
     /**
@@ -220,11 +211,11 @@ class handleAttendance
      */
     private function update()
     {
-        if ($this->Attendance->updateAttendance($this->data['id'], $this->bodyDataRequests) > 0) {
-            $this->Attendance->getConn()->getDb()->commit();
+        if ($this->Provider->updateProvider($this->data['id'], $this->bodyDataRequests) > 0) {
+            $this->Provider->getConn()->getDb()->commit();
             return GenericConsts::MSG_ATUALIZADO_SUCESSO;
         }
-        $this->Attendance->getConn()->getDb()->rollBack();
+        $this->Provider->getConn()->getDb()->rollBack();
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 

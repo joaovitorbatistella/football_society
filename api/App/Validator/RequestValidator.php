@@ -7,7 +7,9 @@ use Model\AuthorizationToken;
 use Service\handleUser;
 use Service\handleProduct;
 use Service\handleCustomer;
+use Service\handleProvider;
 use Service\handleAttendance;
+use Service\handleGame;
 use Infra\GenericConsts;
 use Infra\Json;
 
@@ -23,7 +25,9 @@ class RequestValidator
     const USERS = 'USERS';
     const PRODUCT = 'PRODUCT';
     const CUSTOMER = 'CUSTOMER';
+    const PROVIDER = 'PROVIDER';
     const ATTENDANCE = 'ATTENDANCE';
+    const GAME = 'GAME';
 
     /**
      * RequestValidator constructor.
@@ -92,9 +96,17 @@ class RequestValidator
                     $handleCustomer = new handleCustomer($this->request);
                     $return = $handleCustomer->validateGet();
                     break;
+                case self::PROVIDER:
+                    $handleProvider = new handleProvider($this->request);
+                    $return = $handleProvider->validateGet();
+                    break;
                 case self::ATTENDANCE:
                     $handleAttendance = new handleAttendance($this->request);
                     $return = $handleAttendance->validateGet();
+                    break;
+                case self::GAME:
+                    $handleGame = new handleGame($this->request);
+                    $return = $handleGame->validateGet();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
@@ -127,10 +139,20 @@ class RequestValidator
                     $handleCustomer->setBodyDataRequests($this->requestData);
                     $return = $handleCustomer->validatePost();
                     break;
+                case self::PROVIDER:
+                    $handleProvider = new handleProvider($this->request);
+                    $handleProvider->setBodyDataRequests($this->requestData);
+                    $return = $handleProvider->validatePost();
+                    break;
                 case self::ATTENDANCE:
                     $handleAttendance = new handleAttendance($this->request);
                     $handleAttendance->setBodyDataRequests($this->requestData);
                     $return = $handleAttendance->validatePost();
+                    break;
+                case self::GAME:
+                    $handleGame = new handleGame($this->request);
+                    $handleGame->setBodyDataRequests($this->requestData);
+                    $return = $handleGame->validatePost();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
@@ -159,10 +181,25 @@ class RequestValidator
                     $handleProduct->setBodyDataRequests($this->requestData);
                     $return = $handleProduct->validatePut();
                     break;
+                case self::CUSTOMER:
+                    $handleCustomer = new handleCustomer($this->request);
+                    $handleCustomer->setBodyDataRequests($this->requestData);
+                    $return = $handleCustomer->validatePut();
+                    break;
+                case self::PROVIDER:
+                    $handleProvider = new handleProvider($this->request);
+                    $handleProvider->setBodyDataRequests($this->requestData);
+                    $return = $handleProvider->validatePut();
+                    break;
                 case self::ATTENDANCE:
                     $handleAttendance = new handleAttendance($this->request);
                     $handleAttendance->setBodyDataRequests($this->requestData);
                     $return = $handleAttendance->validatePut();
+                    break;
+                case self::GAME:
+                    $handleGame = new handleGame($this->request);
+                    $handleGame->setBodyDataRequests($this->requestData);
+                    $return = $handleGame->validatePut();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
@@ -189,9 +226,21 @@ class RequestValidator
                     $handleProduct = new handleProduct($this->request);
                     $return = $handleProduct->validateDelete();
                     break;
+                case self::CUSTOMER:
+                    $handleCustomer = new handleCustomer($this->request);
+                    $return = $handleCustomer->validateDelete();
+                    break;
+                case self::PROVIDER:
+                    $handleProvider = new handleProvider($this->request);
+                    $return = $handleProvider->validateDelete();
+                    break;
                 case self::ATTENDANCE:
                     $handleAttendance = new handleAttendance($this->request);
                     $return = $handleAttendance->validateDelete();
+                    break;
+                case self::GAME:
+                    $handleGame = new handleGame($this->request);
+                    $return = $handleGame->validateDelete();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);

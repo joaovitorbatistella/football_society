@@ -60,7 +60,7 @@ class Customer
         $stmt = $this->getConn()->getDb()->query($sql);
 
         if($stmt) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $row;
         } header("HTTP/1.1 406 Not Acceptable");
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
@@ -100,11 +100,12 @@ class Customer
         $stmt->bindParam(':cpf', $cpf);
         $stmt->bindParam(':cityId', $cityId);
         $stmt->execute();
-        return $stmt;
+        return $stmt->rowCount();
     }
 
     /**
      * @param $id
+     * @param $name
      * @param $bornDate
      * @param $telephone
      * @param $email
@@ -116,10 +117,11 @@ class Customer
      */
     public function updateCustomer($id, $data)
     {
-        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET nome = :name, dt_nascimento = :bornDate, telefone = :telephone, email = :email, logradouro = :address, sexo = :sex, cpf = :cpf, cod_cidade = :cityId WHERE codigo = :id';
+        $id = (int)$id;
+        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET nome = :name, dt_nascimento = :bornDate, telefone = :telephone, email = :email, logradouro = :address, sexo = :sex, cpf = :cpf, cod_cidade = :cityId WHERE codigo = '.$id;
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
-        $stmt->bindParam(':id', $id);
+        $stmt->bindValue(':name', $data['name']);
         $stmt->bindValue(':bornDate', $data['bornDate']);
         $stmt->bindValue(':telephone', $data['telephone']);
         $stmt->bindValue(':email', $data['email']);
@@ -128,7 +130,6 @@ class Customer
         $stmt->bindValue(':cpf', $data['cpf']);
         $stmt->bindValue(':cityId', $data['cityId']);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt->rowCount();
     }
 

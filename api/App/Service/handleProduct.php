@@ -172,7 +172,17 @@ class handleProduct
 
     private function store()
     {
-        [$name, $description, $price, $inventory] = [$this->bodyDataRequests['name'], $this->bodyDataRequests['description'], $this->bodyDataRequests['price'], $this->bodyDataRequests['inventory']];
+        [
+            $name,
+            $description,
+            $price,
+            $inventory
+        ] = [
+            $this->bodyDataRequests['name'],
+            $this->bodyDataRequests['description'],
+            $this->bodyDataRequests['price'],
+            $this->bodyDataRequests['inventory']
+        ];
 
         if ($name && $description && $price && $inventory) {
             if ($this->Product->insertProduct($name, $description, $price, $inventory) > 0) {
@@ -181,7 +191,7 @@ class handleProduct
                 return ['insertedId' => $insertedId];
             }
 
-            $this->User->getConn()->getDb()->rollBack();
+            $this->Product->getConn()->getDb()->rollBack();
 
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
         }

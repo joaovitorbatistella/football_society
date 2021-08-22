@@ -3,13 +3,14 @@
 namespace Service;
 
 use InvalidArgumentException;
-use Model\Attendance;
+use Model\Game;
+use Model\AuthorizationToken;
 use Infra\GenericConsts;
 
-class handleAttendance
+class handleGame
 {
-    public const TABLE = 'atendimento';
-    public const GET_RESOURCES = ['list'];
+    public const TABLE = 'jogo';
+    public const GET_RESOURCES = ['list', 'filterByName'];
     public const POST_RESOURCES = ['store'];
     public const DELETE_RESOURCES = ['delete'];
     public const PUT_RESOURCES = ['update'];
@@ -17,18 +18,20 @@ class handleAttendance
     private array $data;
     private array $bodyDataRequests;
     /**
-     * @var object|Attendance
+     * @var object|Game
      */
-    private object $Attendance;
+    private object $Game;
+    private object $AuthorizationToken;
 
     /**
-     * handleAttendance constructor.
+     * handleGame constructor.
      * @param array $data
      */
     public function __construct($data = [])
     {
         $this->data = $data;
-        $this->Attendance = new Attendance();
+        $this->Game = new Game();
+        $this->AuthorizationToken = new AuthorizationToken();
     }
 
     /**
@@ -129,6 +132,7 @@ class handleAttendance
     public function setBodyDataRequests($bodyDataRequests)
     {
         $this->bodyDataRequests = $bodyDataRequests;
+
     }
 
     /**
@@ -136,7 +140,7 @@ class handleAttendance
      */
     private function list()
     {
-        return $this->Attendance->getAllAttendances(self::TABLE);
+        return $this->Game->getAllGames(self::TABLE);
     }
 
     /**
@@ -165,7 +169,7 @@ class handleAttendance
         } else{
            $param= explode('=', $params[0]); 
         }
-        return $this->Attendance->getAttendanceByParams($param);
+        return $this->Game->getGamesByParams($param);
     }
 
     /**
@@ -173,38 +177,36 @@ class handleAttendance
      */
     private function getOneByKey()
     {
-        return $this->Attendance->getConn()->getOneByKey(self::TABLE, $this->data['id']);
+        return $this->User->getConn()->getOneByKey(self::TABLE, $this->data['id']);
     }
 
-    /**
-     * @return array
-     */
     private function store()
     {
         [
-          $description,
-          $dateAndTime,
-          $payed,
-          $customerId
+            $dateAndTime,
+            $price,
+            $description,
+            $discount,
+            $attendanceId
         ] = [
-          $this->bodyDataRequests['description'],
-          $this->bodyDataRequests['dateAndTime'],
-          $this->bodyDataRequests['payed'],
-          $this->bodyDataRequests['customerId']
+            $this->bodyDataRequests['dateAndTime'],
+            $this->bodyDataRequests['price'],
+            $this->bodyDataRequests['description'],
+            $this->bodyDataRequests['discount'],
+            $this->bodyDataRequests['attendanceId'],
         ];
 
-        if ($description && $dateAndTime && $payed && $customerId) {
-            if ($this->Attendance->insertAttendance($description, $dateAndTime, $payed, $customerId) > 0) {
-                $insertedId = $this->Attendance->getConn()->getDb()->lastInsertId();
-                $this->Attendance->getConn()->getDb()->commit();
-                return ['insertedId' => $insertedId];
+        if ($dateAndTime && $price && $description && $attendanceId) {
+            if ($this->Game->insertGame($dateAndTime, $price, $description, $discount, $attendanceId) > 0) {
+                $this->Game->getConn()->getDb()->commit();
+                return 'Game has been inserted.';
             }
 
-            $this->Attendance->getConn()->getDb()->rollBack();
+            $this->Game->getConn()->getDb()->rollBack();
 
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
         }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_LOGIN_SENHA_OBRIGATORIO);
+        throw new InvalidArgumentException(GenericConsts::MSG_ERROR_EMPTY_FIELDS);
     }
 
     /**
@@ -212,7 +214,7 @@ class handleAttendance
      */
     private function delete()
     {
-        return $this->Attendance->getConn()->delete(self::TABLE, $this->data['id']);
+        return $this->Game->getConn()->delete(self::TABLE, $this->data['id']);
     }
 
     /**
@@ -220,11 +222,11 @@ class handleAttendance
      */
     private function update()
     {
-        if ($this->Attendance->updateAttendance($this->data['id'], $this->bodyDataRequests) > 0) {
-            $this->Attendance->getConn()->getDb()->commit();
+        if ($this->Game->updateGame($this->data['id'], $this->bodyDataRequests) > 0) {
+            $this->Game->getConn()->getDb()->commit();
             return GenericConsts::MSG_ATUALIZADO_SUCESSO;
         }
-        $this->Attendance->getConn()->getDb()->rollBack();
+        $this->Game->getConn()->getDb()->rollBack();
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 

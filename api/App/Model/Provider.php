@@ -3,6 +3,7 @@
 namespace Model;
 
 use database\DBConnection;
+use PDO;
 
 class Provider
 {
@@ -18,15 +19,59 @@ class Provider
     }
 
     /**
+     * @param $table
+     * @return Array
+     */
+    public function getAllProviders($table)
+    {
+        if ($table) {
+            $sql = 'SELECT * FROM ' . $table;
+            $stmt = $this->getConn()->getDb()->query($sql);
+            if($stmt) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
+            }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+    }
+
+    /**
+     * @param $param
+     * @return int
+     */
+    public function getProvidersByParams($param)
+    {
+        if($param[0] == 'id'){
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $param[1]."";
+        } else if($param[0] == 'name'){
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE nome LIKE '%".$param[1]."%'";
+        } else if($param[0] == 'cityId'){
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE cod_cidade = ". $param[1];
+        }
+        
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
+    }
+
+    /**
      * @param $name
      * @param $address
      * @param $telephone
      * @param $cityId
      * @return int
      */
-    public function insertProvider($name, $description, $telephone, $cityId)
+    public function insertProvider($name, $address, $telephone, $cityId)
     {
-        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (nome, logradouro, telefone, cod_cidade) VALUES (:name, :description, :telephone, :cityId)';
+        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (nome, logradouro, telefone, cod_cidade) VALUES (:name, :address, :telephone, :cityId)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);
         $stmt->bindParam(':name', $name);
@@ -34,7 +79,6 @@ class Provider
         $stmt->bindParam(':telephone', $telephone);
         $stmt->bindParam(':cityId', $cityId);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt;
     }
 
@@ -58,7 +102,6 @@ class Provider
         $stmt->bindValue(':telephone', $data['telephone']);
         $stmt->bindValue(':cityId', $data['cityId']);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt->rowCount();
     }
 

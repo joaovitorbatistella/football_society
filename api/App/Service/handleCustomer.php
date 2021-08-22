@@ -199,7 +199,7 @@ class handleCustomer
                 return ['insertedId' => $insertedId];
             }
 
-            $this->User->getConn()->getDb()->rollBack();
+            $this->Customer->getConn()->getDb()->rollBack();
 
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
         }
