@@ -151,11 +151,11 @@
               </v-dialog>
               <v-dialog v-model="dialogDelete" max-width="500px">
                 <v-card>
-                  <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                  <v-card-title class="text-h5">Você deseja excluir este jogo?</v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                    <v-btn color="blue darken-1" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
                     <v-spacer></v-spacer>
                   </v-card-actions>
                 </v-card>
@@ -223,14 +223,6 @@ export default {
         cod_atendimento: ''
       }
     ],
-    defaultItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
-    },
-
   }),
   async beforeMount() {
     try {
@@ -307,14 +299,34 @@ export default {
       }
     },
 
-    deleteItem (item) {
-      console.log(item)
+    deleteItem (key) {
       this.dialogDelete = true
+      this.toDelte = key
     },
 
-    deleteItemConfirm () {
-      this.desserts.splice(this.editedIndex, 1)
-      this.closeDelete()
+    async deleteItemConfirm (key) {
+      let token = Cookies.get('jwt-token')   
+      let headers= {
+            'Authorization': 'Bearer '+ token
+            }
+      const data = {
+          dateAndTime: key,
+        }
+      this.loading = true
+      console.log(data, headers)
+
+      await this.$axios
+        .delete('game/delete', { data: data, headers })
+        .then(({data}) => {
+          console.log(data)
+          if(data.type == 'success') {
+            this.updateTable()
+            this.closeDelete()
+          }
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
     },
 
     close () {
@@ -332,15 +344,10 @@ export default {
 
     closeDelete () {
       this.dialogDelete = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
     },
 
     save () {
       if (this.editedIndex > -1) {
-        alert('edit' + this.editedIndex)
         let token = Cookies.get('jwt-token')   
         let headers= {
               'Authorization': 'Bearer '+ token
@@ -364,7 +371,6 @@ export default {
             console.log('error on GET: ', err)
           })
       } else {
-         alert('store' + this.editedIndex)
          let token = Cookies.get('jwt-token')   
           let headers= {
                 'Authorization': 'Bearer '+ token
@@ -390,7 +396,7 @@ export default {
       }
       this.close()
     },
-    updateTable() {
+    async updateTable() {
       try {
         this.gamesList = []
         let token = Cookies.get('jwt-token')   
@@ -399,7 +405,7 @@ export default {
               Authorization: 'Bearer '+ token
               }
         };
-        this.$axios
+        await this.$axios
           .get(`game/list/`, config)
           .then(({ data }) => {
             this.gamesList = data.response
@@ -414,6 +420,7 @@ export default {
           })
           .catch(err => {
             console.log('error on GET: ', err)
+            this.loading = false
           })
       } catch(e) {
         console.log("erro: ", e)
