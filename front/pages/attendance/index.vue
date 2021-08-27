@@ -64,6 +64,7 @@
                             :items="gamesList"
                             hide-selected
                             item-text="data_hora"
+                            color="orange darken-1"
                             item-value="data_hora"
                             label="Selecione um jogo"
                             small-chips
@@ -76,12 +77,14 @@
                           borderLeft: '1px solid #616159',
                           borderBottom: '1px solid #616159',
                         }">
-                        <v-row>
-                          <v-col justify="center" align="center" cols="12" lg="7" md="7">
+                        <v-row v-for="i in input" :key="i" :id='"item"+i'>
+                          <v-col justify="center" align="center" cols="12" lg="8" md="8">
                             <v-combobox
                               :items="productsList"
+                              :id='"productsList"+i'
                               hide-selected
                               item-text="nome"
+                              color="orange darken-1"
                               item-value="codigo"
                               label="Selecione um produto "
                               small-chips
@@ -92,27 +95,62 @@
                           </v-col>
                           <v-col justify="center" align="center" cols="12" lg="2" md="2">
                             <v-text-field
+                              :id='"quantity"+i'
+                              :model="quantity"
+                              color="orange darken-1"
                               type="number"
                               label="Quantidade"
                             ></v-text-field>
                           </v-col>
-                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                          <v-col justify="center" align="center" cols="12" lg="1" md="1">
+                            <v-btn
+                              color="green darken-1"
+                              text
+                              @click="input++"
+                            >
+                              <v-icon
+                                medium
+                                color="green darken-1"
+                              >
+                                mdi-plus-circle-outline
+                              </v-icon>
+                            </v-btn>
+                          </v-col>
+                          <v-col justify="center" align="center" cols="12" lg="1" md="1">
+                            <v-btn
+                              v-if="input > 1"
+                              color="red darken-1"
+                              text
+                              @click="input--"
+                            >
+                              <v-icon
+                                medium
+                                color="red darken-1"
+                              >
+                                mdi-minus-circle-outline
+                              </v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col justify="center" align="center" cols="12" lg="5" md="5">
                             <v-text-field
+                              color="orange darken-1"
                               type="number"
                               label="Valor Total (R$)"
                             ></v-text-field>
                           </v-col>
                           <v-col justify="center" align="center" cols="12" lg="1" md="1">
                             <v-btn
-                              color="blue darken-1"
+                              color="yellow darken-1"
                               text
-                              @click="close"
+                              @click="input--"
                             >
                               <v-icon
                                 medium
-                                color="orange darken-1"
+                                color="yellow darken-1"
                               >
-                                mdi-plus-circle-outline
+                                mdi-reload
                               </v-icon>
                             </v-btn>
                           </v-col>
@@ -127,6 +165,7 @@
                             :items="customersList"
                             hide-selected
                             item-text="nome"
+                            color="orange darken-1"
                             item-value="codigo"
                             label="Selecione um cliente "
                             small-chips
@@ -148,6 +187,7 @@
                           md="4"
                         >
                           <v-text-field
+                            color="orange darken-1"
                             v-model="editedItem[0].data_hora"
                             label="Data e Hora"
                           ></v-text-field>
@@ -158,6 +198,7 @@
                           md="4"
                         >
                           <v-text-field
+                            color="orange darken-1"
                             v-model="editedItem[0].valor"
                             label="Valor  (R$)"
                           ></v-text-field>
@@ -168,6 +209,7 @@
                           md="4"
                         >
                           <v-text-field
+                            color="orange darken-1"
                             v-model="editedItem[0].desconto"
                             label="Desconto (R$)"
                           ></v-text-field>
@@ -178,6 +220,7 @@
                           md="4"
                         >
                           <v-text-field
+                            color="orange darken-1"
                             v-model="editedItem[0].descricao"
                             label="Descrição"
                           ></v-text-field>
@@ -188,6 +231,7 @@
                           md="4"
                         >
                           <v-text-field
+                            color="orange darken-1"
                             v-model="editedItem[0].cod_atendimento"
                             label="Atendimento"
                           ></v-text-field>
@@ -199,14 +243,14 @@
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                      color="blue darken-1"
+                      color="orange darken-1"
                       text
                       @click="close"
                     >
                       Cancel
                     </v-btn>
                     <v-btn
-                      color="blue darken-1"
+                      color="orange darken-1"
                       text
                       @click="save"
                     >
@@ -220,8 +264,8 @@
                   <v-card-title class="text-h5">Você deseja excluir este jogo?</v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
+                    <v-btn color="orange darken-1" text @click="closeDelete">Cancel</v-btn>
+                    <v-btn color="orange darken-1" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
                     <v-spacer></v-spacer>
                   </v-card-actions>
                 </v-card>
@@ -273,6 +317,8 @@ export default {
   },
   data: () => ({
     loading: false,
+    input: 1,
+    quantity: 0,
     loaderMessage: 'Carregando',
     dialog: false,
     dialogDelete: false,
@@ -327,6 +373,9 @@ export default {
   },
 
   watch: {
+    quantity(){
+      console.log('fui chamado')
+    },
     dialog (val) {
       val || this.close()
     },
