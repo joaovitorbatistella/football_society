@@ -69,8 +69,9 @@ class Attendance
      * @param $customerId
      * @return int
      */
-    public function insertAttendance($description, $dateAndTime, $payed, $customerId)
+    public function insertAttendance($description, $payed, $customerId)
     {
+        $dateAndTime = date('Y-m-d H:i:s');
         $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (descricao, data_hora, pago, cod_cliente) VALUES (:description, :dateAndTime, :payed, :customerId)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);

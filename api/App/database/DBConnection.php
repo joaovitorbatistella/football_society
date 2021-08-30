@@ -85,7 +85,7 @@ class DBConnection
     public function getOneByKey($table, $id)
     {
         if ($table && $id) {
-            $sql = 'SELECT * FROM ' . $table . ' WHERE id = :id';
+            $sql = 'SELECT * FROM ' . $table . ' WHERE codigo = :id';
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();

@@ -57,100 +57,183 @@
                     <v-container>
                       <v-row>
                         <v-col :style="{
-                          borderRight: '1px solid #616159',
-                          borderBottom: '1px solid #616159',
+                          borderRight: '1px solid #a5d6a7',
+                          borderBottom: '1px solid #a5d6a7',
                         }">
-                          <v-combobox
-                            :items="gamesList"
-                            hide-selected
-                            item-text="data_hora"
-                            color="orange darken-1"
-                            item-value="data_hora"
-                            label="Selecione um jogo"
-                            small-chips
-                            dense
-                            dark
-                            clearable
-                          />
+                          <v-switch
+                            v-model="newGame"
+                            color="green lighten-3"
+                            label="Novo jogo"
+                          ></v-switch>
+                          <v-row v-if="newGameCtrl == true">
+                            <v-col justify="center" align="center" cols="12" lg="4" md="4">
+                              <v-dialog
+                                ref="gameDateDialog"
+                                v-model="gameDateModal"
+                                :return-value.sync="gameEditedItem[0].date"
+                                persistent
+                                width="290px"
+                              >
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-text-field
+                                    v-model="gameEditedItem[0].date"
+                                    label="Picker in dialog"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  v-model="gameEditedItem[0].date"
+                                  scrollable
+                                >
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="gameDateModal = false"
+                                  >
+                                    Cancel
+                                  </v-btn>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="$refs.gameDateDialog.save(gameEditedItem[0].date); gameTimeModal = true"
+                                  >
+                                    OK
+                                  </v-btn>
+                                </v-date-picker>
+                              </v-dialog>
+
+
+                              <v-dialog
+                                ref="gameTimeDialog"
+                                v-model="gameTimeModal"
+                                :return-value.sync="gameEditedItem[0].hour"
+                                persistent
+                                width="290px"
+                              >
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-text-field
+                                    v-model="gameEditedItem[0].hour"
+                                    label="Picker in dialog"
+                                    prepend-icon="mdi-clock-time-four-outline"
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-time-picker
+                                  v-if="gameTimeModal"
+                                  v-model="gameEditedItem[0].hour"
+                                  full-width
+                                >
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="gameTimeModal = false"
+                                  >
+                                    Cancel
+                                  </v-btn>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="$refs.gameTimeDialog.save(gameEditedItem[0].hour)"
+                                  >
+                                    OK
+                                  </v-btn>
+                                </v-time-picker>
+                              </v-dialog>
+                            </v-col>
+                            <v-col justify="center" align="center" cols="12" lg="8" md="8">
+                              <v-textarea
+                                v-model="gameEditedItem[0].description"
+                                filled
+                                label="Descrição..."
+                                auto-grow
+                              ></v-textarea>
+                            </v-col>
+                          </v-row>
+                          <v-row v-row v-if="newGameCtrl == true">
+                            <v-col justify="center" align="center" cols="12" lg="6" md="6">
+                              <v-text-field
+                                v-model="gameEditedItem[0].price"
+                                color="green lighten-3"
+                                label="Valor do tempo"
+                                type="number"
+                                required
+                              ></v-text-field>
+                            </v-col>
+                            <v-col justify="center" align="center" cols="12" lg="6" md="6">
+                              <v-text-field
+                                v-model="gameEditedItem[0].discount"
+                                color="green lighten-3"
+                                label="Desconto do valor do tempo"
+                                type="number"
+                                required
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
                         </v-col>
                         <v-col :style="{
-                          borderLeft: '1px solid #616159',
-                          borderBottom: '1px solid #616159',
+                          borderLeft: '1px solid #a5d6a7',
+                          borderBottom: '1px solid #a5d6a7',
                         }">
-                        <v-row v-for="i in input" :key="i" :id='"item"+i'>
-                          <v-col justify="center" align="center" cols="12" lg="8" md="8">
-                            <v-combobox
-                              :items="productsList"
-                              :id='"productsList"+i'
-                              hide-selected
-                              item-text="nome"
-                              color="orange darken-1"
-                              item-value="codigo"
-                              label="Selecione um produto "
-                              small-chips
-                              dense
-                              dark
-                              clearable
-                            />
+                        <v-row v-if="buyComplete == true" :style="{
+                          height: '100%',
+                          width: '100%',
+                          backgroundColor: '#00000055'
+                        }">
+                          <v-col justify="center" align="center" cols="12" lg="1" md="1">
+                            
                           </v-col>
-                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
-                            <v-text-field
-                              :id='"quantity"+i'
-                              :model="quantity"
-                              color="orange darken-1"
-                              type="number"
-                              label="Quantidade"
-                            ></v-text-field>
+                          <v-col justify="center" align="center" cols="12" lg="10" md="10">
+                            <v-text>PRODUTOS INSERIDOS</v-text>
                           </v-col>
                           <v-col justify="center" align="center" cols="12" lg="1" md="1">
+                            
+                          </v-col>
+                        </v-row>
+                        <v-row v-if="buyComplete ==false">
+                          <v-col justify="center" align="center" cols="12" lg="10" md="10">
+                              <v-data-table
+                                v-model="selected"
+                                checkbox-color="a5d6a7"
+                                :headers="productsHeaders"
+                                :items="productsList"
+                                item-key="codigo"
+                                show-select
+                                color="green lighten-3"
+                                class="elevation-1"
+                                :single-select="false"
+                              >
+                              </v-data-table>
+                          </v-col>
+                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-btn
+                              color="blue darken-1"
+                              text
+                              @click="getSelectedsProducts"
+                            >
+                              <v-icon
+                                medium
+                                color="blue darken-2"
+                              >
+                                mdi-step-forward-2
+                              </v-icon>
+                            </v-btn>
                             <v-btn
                               color="green darken-1"
                               text
-                              @click="input++"
+                              @click="confirmProducts"
                             >
                               <v-icon
                                 medium
-                                color="green darken-1"
+                                color="green darken-2"
                               >
-                                mdi-plus-circle-outline
-                              </v-icon>
-                            </v-btn>
-                          </v-col>
-                          <v-col justify="center" align="center" cols="12" lg="1" md="1">
-                            <v-btn
-                              v-if="input > 1"
-                              color="red darken-1"
-                              text
-                              @click="input--"
-                            >
-                              <v-icon
-                                medium
-                                color="red darken-1"
-                              >
-                                mdi-minus-circle-outline
-                              </v-icon>
-                            </v-btn>
-                          </v-col>
-                        </v-row>
-                        <v-row>
-                          <v-col justify="center" align="center" cols="12" lg="5" md="5">
-                            <v-text-field
-                              color="orange darken-1"
-                              type="number"
-                              label="Valor Total (R$)"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col justify="center" align="center" cols="12" lg="1" md="1">
-                            <v-btn
-                              color="yellow darken-1"
-                              text
-                              @click="input--"
-                            >
-                              <v-icon
-                                medium
-                                color="yellow darken-1"
-                              >
-                                mdi-reload
+                                mdi-check-all
                               </v-icon>
                             </v-btn>
                           </v-col>
@@ -159,100 +242,136 @@
                       </v-row>
                       <v-row>
                         <v-col :style="{
-                          borderRight: '1px solid #616159',
+                          borderRight: '1px solid #a5d6a7',
                         }">
-                          <v-combobox
-                            :items="customersList"
-                            hide-selected
-                            item-text="nome"
-                            color="orange darken-1"
-                            item-value="codigo"
-                            label="Selecione um cliente "
-                            small-chips
-                            dense
-                            dark
-                            clearable
-                          />
+                          
                         </v-col>
                         <v-col :style="{
-                          borderLeft: '1px solid #616159',
+                          borderLeft: '1px solid #a5d6a7',
                         }">
-                          CAMPOS
+                          <v-row>
+                            <v-col justify="center" align="center" cols="12" lg="12" md="12">
+                              <v-combobox
+                                v-model="editedItem[0].customerId"
+                                :items="customersList"
+                                hide-selected
+                                item-text="nome"
+                                color="green lighten-3"
+                                item-value="codigo"
+                                return-object
+                                label="Selecione um cliente "
+                                small-chips
+                                dense
+                                dark
+                                clearable
+                              />
+                            </v-col>
+                          </v-row>
+                          <v-row>
+                            <v-col justify="center" align="center" cols="12" lg="8" md="8">
+                              <v-textarea
+                                v-model="editedItem[0].description"
+                                filled
+                                label="Descrição..."
+                                auto-grow
+                              ></v-textarea>
+                            </v-col>
+                            <v-col justify="center" align="center" cols="12" lg="1" md="1">
+                              <v-checkbox
+                                v-model="editedItem[0].payed"
+                                label="Pago?"
+                              ></v-checkbox>
+                            </v-col>
+                          </v-row>
                         </v-col>
                       </v-row>
-                      <!-- <v-row>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            color="orange darken-1"
-                            v-model="editedItem[0].data_hora"
-                            label="Data e Hora"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            color="orange darken-1"
-                            v-model="editedItem[0].valor"
-                            label="Valor  (R$)"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            color="orange darken-1"
-                            v-model="editedItem[0].desconto"
-                            label="Desconto (R$)"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            color="orange darken-1"
-                            v-model="editedItem[0].descricao"
-                            label="Descrição"
-                          ></v-text-field>
-                        </v-col>                        
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            color="orange darken-1"
-                            v-model="editedItem[0].cod_atendimento"
-                            label="Atendimento"
-                          ></v-text-field>
-                        </v-col>
-                      </v-row> -->
                     </v-container>
                   </v-card-text>
       
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                      color="orange darken-1"
+                      color="green lighten-3"
                       text
                       @click="close"
                     >
                       Cancel
                     </v-btn>
                     <v-btn
-                      color="orange darken-1"
+                      color="green lighten-3"
                       text
                       @click="save"
+                    >
+                      Save
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+              <v-dialog
+                v-model="productsDialog"
+                width="800px"
+                height="100%"
+              >
+                <!-- PRODUCTS -->
+                <v-card
+                  width="800px"
+                  height="100%"
+                >
+                  <v-card-title>
+                    <span class="text-h5"> CARRINHO DE COMPRAS </span>
+                  </v-card-title>
+
+                  <v-card-text>
+                    <v-container>
+                      <v-layout v-for="(product, index) in selected" :key="product.codigo">
+                        <v-row>
+                          <v-col justify="center" align="center" cols="12" lg="8" md="8">
+                            <v-text-field
+                              :value="product.nome"
+                              :id="index"
+                              color="green lighten-3"
+                              label="Nome do produto"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-text-field
+                              :id="index"
+                              :value="product.preco"
+                              color="green lighten-3"
+                              label="Preço"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-text-field
+                              v-model="quantity[index]"
+                              :value="0"
+                              :id="index"
+                              type="number"
+                              color="green lighten-3"
+                              label="Quantidade"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-layout>
+                    </v-container>
+                  </v-card-text>
+          
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="green lighten-3"
+                      text
+                      @click="closeProducts"
+                    >
+                      Cancel
+                    </v-btn>
+                    <v-btn
+                      color="green lighten-3"
+                      text
+                      @click="buyProducts"
                     >
                       Save
                     </v-btn>
@@ -264,8 +383,8 @@
                   <v-card-title class="text-h5">Você deseja excluir este jogo?</v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="orange darken-1" text @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="orange darken-1" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
+                    <v-btn color="green lighten-3" text @click="closeDelete">Cancel</v-btn>
+                    <v-btn color="green lighten-3" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
                     <v-spacer></v-spacer>
                   </v-card-actions>
                 </v-card>
@@ -308,19 +427,34 @@
 import Cookies from 'js-cookie'
 import Card from '../../components/card.vue'
 import moment from 'moment'
+import VCalendar from 'v-calendar';
 moment.locale('pt-br')
 
 export default {
   middleware: ['authenticated'],
   components: {
-    Card
+    Card,
+    VCalendar
   },
   data: () => ({
     loading: false,
     input: 1,
-    quantity: 0,
-    loaderMessage: 'Carregando',
+    quantity: [],
+    newGameCtrl: false,
+    newGame: false,
     dialog: false,
+    insertedAttendanceId: null,
+    gameDate: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+    gameDateModal: false,
+    gameTime: null,
+    gameTimeModal: false,
+    productDate: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+    productDateModal: false,
+    productTime: null,
+    productTimeModal: false,
+    loaderMessage: 'Carregando',
+    buyComplete: false,
+    productsDialog: false,
     dialogDelete: false,
     attendanceList: [],
     attendanceHeaders: [
@@ -333,14 +467,35 @@ export default {
     ],
     customersList: [],
     productsList: [],
+    productData: {
+      name: '',
+      description: '',
+      price: null,
+      inventory: null,
+    },
+    selected: [],
+    productsHeaders: [
+      { text: 'Código', value: 'codigo' },
+      { text: 'Nome', value: 'nome' },
+      { text: 'Preço', value: 'preco' },
+      { text: 'Estoque', value: 'estoque' },
+    ],
     gamesList: [],
     editedIndex: -1,
     editedItem: [
       {
-        descricao: '',
-        data_hora: '',
-        pago: '',
-        cod_cliente: ''
+        description: '',
+        payed: false,
+        customerId: null
+      }
+    ],
+    gameEditedItem: [
+      {
+        date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+        hour: null,
+        payed: false,
+        proce: null,
+        discount: null,
       }
     ],
   }),
@@ -362,6 +517,17 @@ export default {
         .catch(err => {
           console.log('error on GET: ', err)
         })
+
+    this.loading = true
+      await this.$axios
+        .get(`ref/list/`, config)
+        .then(({ data }) => {
+          this.gamePrice = data.response[0].valor
+          this.loading = false
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
     } catch(e) {
       console.log("erro: ", e)
     }
@@ -373,6 +539,12 @@ export default {
   },
 
   watch: {
+    newGame(n) {
+      if(n == true ){
+        this.newGameCtrl = true
+      } else if(n == false)
+        this.newGameCtrl = false
+    },
     quantity(){
       console.log('fui chamado')
     },
@@ -421,6 +593,16 @@ export default {
           console.log('error on GET: ', err)
         })
     },
+    getSelectedsProducts() {
+      if(this.selected.length > 0) {
+        this.productsDialog = true
+      } else {
+        alert('Selecione algum produto')
+      }
+    },
+    confirmProducts() {
+      this.buyComplete = true
+    },
     editItem (item) {
       try {
         this.editedIndex = 1
@@ -455,7 +637,16 @@ export default {
         console.log(e)
       }
     },
-
+    buyProducts() {
+      for(var i=0; i < this.selected.length; i++) {
+        if(this.quantity[i] <= this.selected[i].estoque) {
+          Object.assign(this.selected[i], {quantity: parseInt(this.quantity[i])})
+          this.closeProducts()
+        } else {
+          alert('Estoque insuficiente, o estoque do produto: '+ this.selected[i].nome+' é: '+ this.selected[i].estoque)
+        }
+      }     
+    },
     deleteItem (key) {
       this.dialogDelete = true
       this.toDelte = key
@@ -480,7 +671,9 @@ export default {
           console.log('error on GET: ', err)
         })
     },
-
+    closeProducts(){
+      this.productsDialog = false
+    },
     close () {
       this.dialog = false
       this.$nextTick(() => {
@@ -498,19 +691,17 @@ export default {
       this.dialogDelete = false
     },
 
-    save () {
+    async save () {
       if (this.editedIndex > -1) {
         let token = Cookies.get('jwt-token')   
         let headers= {
               'Authorization': 'Bearer '+ token
               }
         const data = {
-            oldDateAndTime: this.editedItem[0].old_data_hora,
-            newDateAndTime: this.editedItem[0].data_hora,
-            price: this.editedItem[0].valor,
-            description: this.editedItem[0].descricao,
-            discount: this.editedItem[0].desconto,
-            attendanceId: this.editedItem[0].cod_atendimento
+            description: 'outro atendimento teste',
+            dateAndTime: '2021-08-21 23:32:00',
+            payed: 'N',
+            customerId: this.customer
           }
         this.loading = true
         this.$axios
@@ -523,28 +714,91 @@ export default {
             console.log('error on GET: ', err)
           })
       } else {
-         let token = Cookies.get('jwt-token')   
-          let headers= {
-                'Authorization': 'Bearer '+ token
-                }
-          const data = {
-              dateAndTime: this.editedItem[0].data_hora,
-              price: this.editedItem[0].valor,
-              description: this.editedItem[0].descricao,
-              discount: this.editedItem[0].desconto == '' ? 0.00 :  this.editedItem[0].desconto,
-              attendanceId: this.editedItem[0].cod_atendimento
-            }
-          console.log(data)
+        let token = Cookies.get('jwt-token')   
+        let headers= {
+          'Authorization': 'Bearer '+ token
+        }
+        if(this.newGameCtrl == true) {
+          const attendanceData = {
+            description: this.editedItem[0].description,
+            payed: this.editedItem[0].payed == true ? 'Y' : 'N',
+            customerId: this.editedItem[0].customerId.codigo
+          }
           this.loading = true
-          this.$axios
-            .post(`attendance/store/`, data, {headers})
-            .then(({ data }) => {
-              console.log(data)
-              this.updateTable()
+          await this.$axios
+            .post(`attendance/store/`, attendanceData, {headers})
+            .then(( {data} ) => {
+              this.insertedAttendanceId = data.response.insertedId
             })
             .catch(err => {
               console.log('error on GET: ', err)
             })
+
+          const gameData = {
+            dateAndTime: this.gameEditedItem[0].date + ' ' + this.gameEditedItem[0].hour+':00',
+            price: this.gameEditedItem[0].price,
+            description: this.gameEditedItem[0].description,
+            discount: this.gameEditedItem[0].discount == '' ? 0.00 :  this.gameEditedItem[0].discount,
+            attendanceId: this.insertedAttendanceId
+          }
+          console.log(gameData)
+          await this.$axios
+            .post(`game/store/`, gameData, {headers})
+            .then(({ data }) => {
+              console.log(data)
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            })
+          console.log(this.selected)
+          for(var i=0; i < this.selected.length; i++){
+            console.log("for")
+            const productAttndData = {
+              attendanceId: this.insertedAttendanceId,
+              productId: this.selected[i].codigo,
+              quantity: this.selected[i].quantity,
+              fullPrice: this.selected[i].preco * this.selected[i].quantity,
+              unityPrice: this.selected[i].preco
+            }
+            console.log("productAttndData", productAttndData)
+            console.log("tem que estar vazio", this.productData)
+            await this.$axios
+              .post(`productattendance/store/`, productAttndData, {headers})
+              .then(pad => {
+                console.log("PAD", pad)
+                if(pad.data.type == 'success') {
+                  console.log("-> prox. list/id", this.selected[i])
+                }
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+            await this.$axios
+              .get(`product/list/${this.selected[i].codigo}`, {headers})
+              .then(pd => {
+                console.log("PD",pd)
+                this.productData = {
+                  name: pd.data.response.nome,
+                  description: pd.data.response.descricao,
+                  price: pd.data.response.preco,
+                  inventory: pd.data.response.estoque - this.selected[i].quantity,
+                }
+                console.log("product Data -> prox. update", this.productData)
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+                this.loading = false
+              })
+            await this.$axios
+              .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+              .then()
+              .catch(err => {
+                console.log('error on GET: ', err)
+                this.loading = false
+              }) 
+          }
+          await this.updateTable()
+        }
       }
       this.close()
     },

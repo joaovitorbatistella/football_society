@@ -10,6 +10,8 @@ use Service\handleCustomer;
 use Service\handleProvider;
 use Service\handleAttendance;
 use Service\handleGame;
+use Service\handleRef;
+use Service\handleProductAttendance;
 use Infra\GenericConsts;
 use Infra\Json;
 
@@ -28,6 +30,8 @@ class RequestValidator
     const PROVIDER = 'PROVIDER';
     const ATTENDANCE = 'ATTENDANCE';
     const GAME = 'GAME';
+    const REF = 'REF';
+    const PRODUCTATTENDANCE = 'PRODUCTATTENDANCE';
 
     /**
      * RequestValidator constructor.
@@ -64,8 +68,10 @@ class RequestValidator
             $method = $this->request['method'].'logout';
             $this->AuthorizationToken->validToken(getallheaders()['Authorization']);
         } else if ($this->request['route'] === 'GAME' && $this->request['resource'] === 'delete' && $this->request['method'] === 'DELETE'){
-                $this->requestData = Json::handleBodyRequest();
-                $method = $this->request['method'];
+            $this->requestData = Json::handleBodyRequest();
+            $method = $this->request['method'];
+        } else if ($this->request['route'] === 'REF' && $this->request['resource'] === 'list' && $this->request['method'] === 'GET'){
+            $method = $this->request['method'];
         }else {
             if ($this->request['method'] !== self::GET && $this->request['method'] !== self::DELETE) {
                 $this->requestData = Json::handleBodyRequest();
@@ -110,6 +116,10 @@ class RequestValidator
                 case self::GAME:
                     $handleGame = new handleGame($this->request);
                     $return = $handleGame->validateGet();
+                    break;
+                case self::REF:
+                    $handleRef = new handleRef($this->request);
+                    $return = $handleRef->validateGet();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
@@ -156,6 +166,11 @@ class RequestValidator
                     $handleGame = new handleGame($this->request);
                     $handleGame->setBodyDataRequests($this->requestData);
                     $return = $handleGame->validatePost();
+                    break;
+                case self::PRODUCTATTENDANCE:
+                    $handleProductAttendance = new handleProductAttendance($this->request);
+                    $handleProductAttendance->setBodyDataRequests($this->requestData);
+                    $return = $handleProductAttendance->validatePost();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);

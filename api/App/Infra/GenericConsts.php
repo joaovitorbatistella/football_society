@@ -6,10 +6,10 @@ abstract class GenericConsts
 {
     /* REQUESTS */
     public const REQUEST_TYPES = ['GET', 'POST', 'DELETE', 'PUT'];
-    public const GET_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME'];
-    public const POST_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME'];
-    public const DELETE_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME'];
-    public const PUT_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME'];
+    public const GET_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME', 'REF', 'PRODUCTATTENDANCE'];
+    public const POST_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME', 'REF', 'PRODUCTATTENDANCE'];
+    public const DELETE_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME', 'REF', 'PRODUCTATTENDANCE'];
+    public const PUT_TYPE = ['USERS', 'PRODUCT', 'CUSTOMER', 'PROVIDER', 'ATTENDANCE', 'GAME', 'REF', 'PRODUCTATTENDANCE'];
 
     /* ERRORS */
     public const MSG_ERROR_ROUTER_TYPE = 'Rota não permitida!';

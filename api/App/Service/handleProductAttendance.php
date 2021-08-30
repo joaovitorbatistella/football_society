@@ -3,14 +3,14 @@
 namespace Service;
 
 use InvalidArgumentException;
-use Model\Product;
+use Model\ProductAttendance;
 use Model\AuthorizationToken;
 use Infra\GenericConsts;
 
-class handleProduct
+class handleProductAttendance
 {
-    public const TABLE = 'produto';
-    public const GET_RESOURCES = ['list', 'filterByName'];
+    public const TABLE = 'produto_atendimento';
+    public const GET_RESOURCES = ['list'];
     public const POST_RESOURCES = ['store'];
     public const DELETE_RESOURCES = ['delete'];
     public const PUT_RESOURCES = ['update'];
@@ -18,19 +18,19 @@ class handleProduct
     private array $data;
     private array $bodyDataRequests;
     /**
-     * @var object|Product
+     * @var object|ProductAttendance
      */
-    private object $Product;
+    private object $ProductAttendance;
     private object $AuthorizationToken;
 
     /**
-     * handleProduct constructor.
+     * handleProductAttendance constructor.
      * @param array $data
      */
     public function __construct($data = [])
     {
         $this->data = $data;
-        $this->Product = new Product();
+        $this->ProductAttendance = new ProductAttendance();
         $this->AuthorizationToken = new AuthorizationToken();
     }
 
@@ -140,59 +140,32 @@ class handleProduct
      */
     private function list()
     {
-        return $this->Product->getAllProduct(self::TABLE);
-    }
-
-    /**
-     * @param $data
-     * @return mixed
-     */
-    private function filterByParams($data)
-    {
-        $var = explode('&', $data);
-        $params=[];
-        for($i=0; $i < count($var); $i++) {
-            $params[$i] = $var[$i];
-        }
-        for($i=0; $i < count($params); $i++) {
-          $params[$i] = str_replace('%20', ' ', $params[$i]);
-          $params[$i] = str_replace('%40', '@', $params[$i]);
-          $params[$i] = str_replace('+', ' ', $params[$i]);
-        }
-        $param= explode('=', $params[0]);
-        return $this->Product->getProductByParams($param);
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getOneByKey()
-    {
-        return $this->Product->getConn()->getOneByKey(self::TABLE, $this->data['id']);
+        return $this->ProductAttendance->getAllProductAttendance(self::TABLE);
     }
 
     private function store()
     {
         [
-            $name,
-            $description,
-            $price,
-            $inventory
+            $attendanceId,
+            $productId,
+            $quantity,
+            $fullPrice,
+            $unityPrice
         ] = [
-            $this->bodyDataRequests['name'],
-            $this->bodyDataRequests['description'],
-            $this->bodyDataRequests['price'],
-            $this->bodyDataRequests['inventory']
+            $this->bodyDataRequests['attendanceId'],
+            $this->bodyDataRequests['productId'],
+            $this->bodyDataRequests['quantity'],
+            $this->bodyDataRequests['fullPrice'],
+            $this->bodyDataRequests['unityPrice'],
         ];
 
-        if ($name && $description && $price && $inventory) {
-            if ($this->Product->insertProduct($name, $description, $price, $inventory) > 0) {
-                $insertedId = $this->Product->getConn()->getDb()->lastInsertId();
-                $this->Product->getConn()->getDb()->commit();
-                return ['insertedId' => $insertedId];
+        if ($attendanceId && $productId && $quantity && $fullPrice && $unityPrice) {
+            if ($this->ProductAttendance->insertProductAttendance($attendanceId, $productId, $quantity, $fullPrice, $unityPrice) > 0) {
+                $this->ProductAttendance->getConn()->getDb()->commit();
+                return ['message' => 'Product has been registered in attendance relationship'];
             }
 
-            $this->Product->getConn()->getDb()->rollBack();
+            $this->ProductAttendance->getConn()->getDb()->rollBack();
 
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
         }
@@ -204,7 +177,7 @@ class handleProduct
      */
     private function delete()
     {
-        return $this->Product->getConn()->delete(self::TABLE, $this->data['id']);
+        return $this->ProductAttendance->getConn()->delete(self::TABLE, $this->data['id']);
     }
 
     /**
@@ -212,11 +185,11 @@ class handleProduct
      */
     private function update()
     {
-        if ($this->Product->updateProduct($this->data['id'], $this->bodyDataRequests) > 0) {
-            $this->Product->getConn()->getDb()->commit();
+        if ($this->ProductAttendance->updateProductAttendance($this->data['id'], $this->bodyDataRequests) > 0) {
+            $this->ProductAttendance->getConn()->getDb()->commit();
             return GenericConsts::MSG_ATUALIZADO_SUCESSO;
         }
-        $this->Product->getConn()->getDb()->rollBack();
+        $this->ProductAttendance->getConn()->getDb()->rollBack();
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 

@@ -184,18 +184,16 @@ class handleAttendance
     {
         [
           $description,
-          $dateAndTime,
           $payed,
           $customerId
         ] = [
           $this->bodyDataRequests['description'],
-          $this->bodyDataRequests['dateAndTime'],
           $this->bodyDataRequests['payed'],
           $this->bodyDataRequests['customerId']
         ];
 
-        if ($description && $dateAndTime && $payed && $customerId) {
-            if ($this->Attendance->insertAttendance($description, $dateAndTime, $payed, $customerId) > 0) {
+        if ($description && $payed && $customerId) {
+            if ($this->Attendance->insertAttendance($description, $payed, $customerId) > 0) {
                 $insertedId = $this->Attendance->getConn()->getDb()->lastInsertId();
                 $this->Attendance->getConn()->getDb()->commit();
                 return ['insertedId' => $insertedId];
