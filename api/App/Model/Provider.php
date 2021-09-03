@@ -4,6 +4,8 @@ namespace Model;
 
 use database\DBConnection;
 use PDO;
+use InvalidArgumentException;
+use Infra\GenericConsts;
 
 class Provider
 {

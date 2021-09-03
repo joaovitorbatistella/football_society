@@ -3,6 +3,9 @@
 namespace Model;
 
 use database\DBConnection;
+use PDO;
+use InvalidArgumentException;
+use Infra\GenericConsts;
 
 class ProductAttendance
 {
@@ -38,6 +41,26 @@ class ProductAttendance
         $stmt->execute();
         return $stmt;
     }
+
+     /**
+     * @param $param
+     * @return int
+     */
+    public function getProductAttendanceByParams($param)
+    {
+        if($param[0] == 'attendanceId'){
+            $id = (int)$param[1];
+            $sql = "SELECT * FROM produto_atendimento  WHERE cod_atendimento = ". $param[1];
+        }
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
+    }
+    
 
     /**
      * @param $attendanceId

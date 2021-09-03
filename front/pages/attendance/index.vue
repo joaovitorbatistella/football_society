@@ -56,7 +56,129 @@
                   <v-card-text>
                     <v-container>
                       <v-row>
-                        <v-col :style="{
+                        <v-col v-if="editedIndex > -1" :style="{
+                          borderRight: '1px solid #a5d6a7',
+                          borderBottom: '1px solid #a5d6a7',
+                        }">
+                          <v-switch
+                            v-model="newGame"
+                            color="green lighten-3"
+                            label="Alterar jogo"
+                          ></v-switch>
+                          <v-row v-if="newGameCtrl == true">
+                            <v-col justify="center" align="center" cols="12" lg="4" md="4">
+                              <v-dialog
+                                ref="gameDateDialog"
+                                v-model="gameDateModal"
+                                :return-value.sync="gameEditedItem[0].date"
+                                persistent
+                                width="290px"
+                              >
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-text-field
+                                    v-model="gameEditedItem[0].date"
+                                    label="Picker in dialog"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  v-model="gameEditedItem[0].date"
+                                  scrollable
+                                >
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="gameDateModal = false"
+                                  >
+                                    Cancel
+                                  </v-btn>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="$refs.gameDateDialog.save(gameEditedItem[0].date); gameTimeModal = true"
+                                  >
+                                    OK
+                                  </v-btn>
+                                </v-date-picker>
+                              </v-dialog>
+
+
+                              <v-dialog
+                                ref="gameTimeDialog"
+                                v-model="gameTimeModal"
+                                :return-value.sync="gameEditedItem[0].hour"
+                                persistent
+                                width="290px"
+                              >
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-text-field
+                                    v-model="gameEditedItem[0].hour"
+                                    label="Picker in dialog"
+                                    prepend-icon="mdi-clock-time-four-outline"
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-time-picker
+                                  v-if="gameTimeModal"
+                                  v-model="gameEditedItem[0].hour"
+                                  full-width
+                                >
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="gameTimeModal = false"
+                                  >
+                                    Cancel
+                                  </v-btn>
+                                  <v-btn
+                                    text
+                                    color="primary"
+                                    @click="$refs.gameTimeDialog.save(gameEditedItem[0].hour)"
+                                  >
+                                    OK
+                                  </v-btn>
+                                </v-time-picker>
+                              </v-dialog>
+                            </v-col>
+                            <v-col justify="center" align="center" cols="12" lg="8" md="8">
+                              <v-textarea
+                                v-model="gameEditedItem[0].description"
+                                filled
+                                label="Descrição..."
+                                auto-grow
+                              ></v-textarea>
+                            </v-col>
+                          </v-row>
+                          <v-row v-row v-if="newGameCtrl == true">
+                            <v-col justify="center" align="center" cols="12" lg="6" md="6">
+                              <v-text-field
+                                v-model="gameEditedItem[0].price"
+                                color="green lighten-3"
+                                label="Valor do tempo"
+                                type="number"
+                                required
+                              ></v-text-field>
+                            </v-col>
+                            <v-col justify="center" align="center" cols="12" lg="6" md="6">
+                              <v-text-field
+                                v-model="gameEditedItem[0].discount"
+                                color="green lighten-3"
+                                label="Desconto do valor do tempo"
+                                type="number"
+                                required
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
+                        </v-col>
+                        
+                        <v-col v-if="editedIndex <= -1" :style="{
                           borderRight: '1px solid #a5d6a7',
                           borderBottom: '1px solid #a5d6a7',
                         }">
@@ -402,13 +524,13 @@
             <v-icon
               small
               class="mr-2"
-              @click="editItem(item.data_hora)"
+              @click="editItem(item.codigo)"
             >
               mdi-pencil
             </v-icon>
             <v-icon
               small
-              @click="deleteItem(item.data_hora)"
+              @click="deleteItem(item.codigo)"
             >
               mdi-delete
             </v-icon>
@@ -444,11 +566,10 @@ export default {
     newGame: false,
     dialog: false,
     insertedAttendanceId: null,
-    gameDate: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+    gameHour: '',
     gameDateModal: false,
     gameTime: null,
     gameTimeModal: false,
-    productDate: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
     productDateModal: false,
     productTime: null,
     productTimeModal: false,
@@ -493,8 +614,8 @@ export default {
       {
         date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
         hour: null,
-        payed: false,
-        proce: null,
+        description: '',
+        price: null,
         discount: null,
       }
     ],
@@ -603,7 +724,7 @@ export default {
     confirmProducts() {
       this.buyComplete = true
     },
-    editItem (item) {
+    async editItem (id) {
       try {
         this.editedIndex = 1
         let token = Cookies.get('jwt-token')   
@@ -612,27 +733,74 @@ export default {
               Authorization: 'Bearer '+ token
               },
               params: {
-                dateTime: item
+                id: id
               }
-        };
+        }
         this.loading = true
-        this.$axios
+        await this.$axios
           .get(`attendance/list/`, config)
           .then(({ data }) => {
+            //let dateTime = data.response[0].data_hora.split(' ')
             this.editedItem[0] = {
-              data_hora: data.response[0].data_hora,
-              old_data_hora: data.response[0].data_hora,
-              valor: data.response[0].valor,
-              descricao: data.response[0].descricao,
-              desconto: data.response[0].desconto,
-              cod_atendimento: data.response[0].cod_atendimento
+              description: data.response[0].descricao,
+              dateTime: data.response[0].data_hora,
+              payed: data.response[0].pago,
+              customerId: data.response[0].cod_cliente
             }
+            this.gameHour = data.response[0].horario_jogo
             this.dialog = true
             this.loading = false
           })
           .catch(err => {
             console.log('error on GET: ', err)
           })
+          console.log("GAME HOUR", this.gameHour)
+        if(this.gameHour != null){
+          const configGame = {
+            headers: {
+              Authorization: 'Bearer '+ token
+              },
+              params: {
+                dateTime: this.gameHour
+              }
+          }
+          await this.$axios
+            .get(`game/list/`, configGame)
+            .then(({ data }) => {
+              let dateTime = data.response[0].data_hora.split(' ')
+              this.gameEditedItem[0] = {
+                date: dateTime[0],
+                hour: dateTime[1],
+                description: data.response[0].descricao,
+                price: data.response[0].valor,
+                discount: data.response[0].desconto,
+              }
+              this.dialog = true
+              this.loading = false
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            })
+        }
+
+        const configProduct = {
+          headers: {
+            Authorization: 'Bearer '+ token
+            },
+            params: {
+              attendanceId: id
+            }
+        };
+        await this.$axios
+            .get(`productattendance/list/`, configProduct)
+            .then(({ data }) => {
+              this.selected = data.response[0]
+              this.dialog = true
+              this.loading = false
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            }) 
       } catch(e) {
         console.log(e)
       }
@@ -678,10 +846,10 @@ export default {
       this.dialog = false
       this.$nextTick(() => {
         this.editedItem[0] = {
-          data_hora: '',
-          valor: '',
-          descricao: '',
-          cod_atendimento: ''
+          description: '',
+          dateTime: '',
+          payed: '',
+          customerId: null
         } 
         this.editedIndex = -1
       })
@@ -693,26 +861,92 @@ export default {
 
     async save () {
       if (this.editedIndex > -1) {
+        
         let token = Cookies.get('jwt-token')   
         let headers= {
-              'Authorization': 'Bearer '+ token
-              }
-        const data = {
-            description: 'outro atendimento teste',
-            dateAndTime: '2021-08-21 23:32:00',
-            payed: 'N',
-            customerId: this.customer
+          'Authorization': 'Bearer '+ token
+        }
+        if(this.newGameCtrl == true) {
+          const attendanceData = {
+            description: this.editedItem[0].description,
+            payed: this.editedItem[0].payed == true ? 'Y' : 'N',
+            customerId: this.editedItem[0].customerId.codigo
           }
-        this.loading = true
-        this.$axios
-          .put(`attendance/update/`, data, {headers})
-          .then(({ data }) => {
-            console.log(data)
-            this.updateTable()
-          })
-          .catch(err => {
-            console.log('error on GET: ', err)
-          })
+          this.loading = true
+          await this.$axios
+            .post(`attendance/update/`, attendanceData, {headers})
+            .then(( {data} ) => {
+              this.insertedAttendanceId = data.response.insertedId
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            })
+
+          const gameData = {
+            dateAndTime: this.gameEditedItem[0].date + ' ' + this.gameEditedItem[0].hour+':00',
+            price: this.gameEditedItem[0].price,
+            description: this.gameEditedItem[0].description,
+            discount: this.gameEditedItem[0].discount == '' ? 0.00 :  this.gameEditedItem[0].discount,
+            attendanceId: this.insertedAttendanceId
+          }
+          console.log(gameData)
+          await this.$axios
+            .post(`game/update/`, gameData, {headers})
+            .then(({ data }) => {
+              console.log(data)
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            })
+          console.log(this.selected)
+          for(var i=0; i < this.selected.length; i++){
+            console.log("for")
+            const productAttndData = {
+              attendanceId: this.insertedAttendanceId,
+              productId: this.selected[i].codigo,
+              quantity: this.selected[i].quantity,
+              fullPrice: this.selected[i].preco * this.selected[i].quantity,
+              unityPrice: this.selected[i].preco
+            }
+            console.log("productAttndData", productAttndData)
+            console.log("tem que estar vazio", this.productData)
+            await this.$axios
+              .post(`productattendance/store/`, productAttndData, {headers})
+              .then(pad => {
+                console.log("PAD", pad)
+                if(pad.data.type == 'success') {
+                  console.log("-> prox. list/id", this.selected[i])
+                }
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+            await this.$axios
+              .get(`product/list/${this.selected[i].codigo}`, {headers})
+              .then(pd => {
+                console.log("PD",pd)
+                this.productData = {
+                  name: pd.data.response.nome,
+                  description: pd.data.response.descricao,
+                  price: pd.data.response.preco,
+                  inventory: pd.data.response.estoque - this.selected[i].quantity,
+                }
+                console.log("product Data -> prox. update", this.productData)
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+                this.loading = false
+              })
+            await this.$axios
+              .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+              .then()
+              .catch(err => {
+                console.log('error on GET: ', err)
+                this.loading = false
+              }) 
+          }
+          await this.updateTable()
+        }
       } else {
         let token = Cookies.get('jwt-token')   
         let headers= {

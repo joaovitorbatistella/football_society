@@ -121,6 +121,10 @@ class RequestValidator
                     $handleRef = new handleRef($this->request);
                     $return = $handleRef->validateGet();
                     break;
+                case self::PRODUCTATTENDANCE:
+                    $handleProductAttendance = new handleProductAttendance($this->request);
+                    $return = $handleProductAttendance->validateGet();
+                    break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
             }

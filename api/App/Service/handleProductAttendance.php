@@ -143,6 +143,37 @@ class handleProductAttendance
         return $this->ProductAttendance->getAllProductAttendance(self::TABLE);
     }
 
+    /**
+     * @param $data
+     * @return mixed
+     */
+    private function filterByParams($data)
+    {
+        $var = explode('&', $data);
+        $params=[];
+        for($i=0; $i < count($var); $i++) {
+            $params[$i] = $var[$i];
+        }
+        for($i=0; $i < count($params); $i++) {
+            $params[$i] = str_replace('%20', ' ', $params[$i]);
+            $params[$i] = str_replace('%3A', ':', $params[$i]);
+            $params[$i] = str_replace('%40', '@', $params[$i]);
+            $params[$i] = str_replace('+', ' ', $params[$i]);
+        }
+        if(count($params) > 1) {
+            $startDate= explode('=', $params[0]);
+            $endDate= explode('=', $params[1]);
+            $param= [
+                $startDate,
+                $endDate
+            ];
+        } else{
+           $param= explode('=', $params[0]); 
+        }
+        return $this->ProductAttendance->getProductAttendanceByParams($param);
+    }
+
+
     private function store()
     {
         [

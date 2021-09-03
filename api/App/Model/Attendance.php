@@ -4,6 +4,8 @@ namespace Model;
 
 use database\DBConnection;
 use PDO;
+use InvalidArgumentException;
+use Infra\GenericConsts;
 
 class Attendance
 {
@@ -47,10 +49,10 @@ class Attendance
     {
         if($param[0] == 'id'){
             $id = (int)$param[1];
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $id;
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento WHERE a.codigo = ". $id ;
         }
         else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'";
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento  WHERE a.data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
 
