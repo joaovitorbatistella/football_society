@@ -66,11 +66,7 @@ class handleProductAttendance
         $return = null;
         $resource = $this->data['resource'];
         if (in_array($resource, self::DELETE_RESOURCES, true)) {
-            if ($this->data['id'] > 0) {
-                $return = $this->$resource();
-            } else {
-                throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
-            }
+            $return = $this->$resource();
         } else {
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
         }
@@ -110,11 +106,7 @@ class handleProductAttendance
         $return = null;
         $resource = $this->data['resource'];
         if (in_array($resource, self::PUT_RESOURCES, true)) {
-            if ($this->data['id'] > 0) {
-                $return = $this->$resource();
-            } else {
-                throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
-            }
+            $return = $this->$resource();
         } else {
             throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
         }
@@ -208,7 +200,12 @@ class handleProductAttendance
      */
     private function delete()
     {
-        return $this->ProductAttendance->getConn()->delete(self::TABLE, $this->data['id']);
+        if ($this->ProductAttendance->deletePA($this->bodyDataRequests) > 0) {
+            $this->ProductAttendance->getConn()->getDb()->commit();
+            return GenericConsts::MSG_ATUALIZADO_SUCESSO;
+        }
+        $this->ProductAttendance->getConn()->getDb()->rollBack();
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 
     /**
@@ -216,9 +213,10 @@ class handleProductAttendance
      */
     private function update()
     {
-        if ($this->ProductAttendance->updateProductAttendance($this->data['id'], $this->bodyDataRequests) > 0) {
+        if ($this->ProductAttendance->updateProductAttendance($this->bodyDataRequests) > 0) {
             $this->ProductAttendance->getConn()->getDb()->commit();
-            return GenericConsts::MSG_ATUALIZADO_SUCESSO;
+            var_dump(GenericConsts::MSG_DELETADO_SUCESSO);
+            return GenericConsts::MSG_DELETADO_SUCESSO;
         }
         $this->ProductAttendance->getConn()->getDb()->rollBack();
         throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);

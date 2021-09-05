@@ -18,6 +18,7 @@ class Attendance
     public function __construct()
     {
         $this->Conn = new DBConnection();
+        $this->DateTime = new DateTime();
     }
 
     /**
@@ -49,10 +50,10 @@ class Attendance
     {
         if($param[0] == 'id'){
             $id = (int)$param[1];
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento WHERE a.codigo = ". $id ;
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.cod_cliente, c.nome, a.pago, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente c ON c.codigo = a.cod_cliente WHERE a.codigo = ". $id ;
         }
         else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento  WHERE a.data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'";
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.cod_cliente, c.nome, a.pago, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente c ON c.codigo = a.cod_cliente WHERE a.data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
 
@@ -73,7 +74,7 @@ class Attendance
      */
     public function insertAttendance($description, $payed, $customerId)
     {
-        $dateAndTime = date('Y-m-d H:i:s');
+        $dateAndTime = $this->DateTime->getNow();
         $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (descricao, data_hora, pago, cod_cliente) VALUES (:description, :dateAndTime, :payed, :customerId)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);
@@ -96,12 +97,13 @@ class Attendance
      */
     public function updateAttendance($id, $data)
     {
+        $dateAndTime = $this->DateTime->getNow();
         $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET descricao = :description, data_hora = :dateAndTime, pago = :payed, cod_cliente = :customerId WHERE codigo = :id';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
         $stmt->bindParam(':id', $id);
         $stmt->bindValue(':description', $data['description']);
-        $stmt->bindValue(':dateAndTime', $data['dateAndTime']);
+        $stmt->bindValue(':dateAndTime', $dateAndTime);
         $stmt->bindValue(':payed', $data['payed']);
         $stmt->bindValue(':customerId', $data['customerId']);
         $stmt->execute();

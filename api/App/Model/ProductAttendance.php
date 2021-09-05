@@ -48,9 +48,11 @@ class ProductAttendance
      */
     public function getProductAttendanceByParams($param)
     {
-        if($param[0] == 'attendanceId'){
+        if($param[0] == 'attendanceId' && $param[0][0] == 'a'){
             $id = (int)$param[1];
-            $sql = "SELECT * FROM produto_atendimento  WHERE cod_atendimento = ". $param[1];
+            $sql = "SELECT pa.cod_produto, pa.quantidade, pa.valor_unitario, p.estoque, p.nome as nome FROM produto_atendimento pa INNER JOIN produto p ON pa.cod_produto = p.codigo WHERE pa.cod_atendimento = ". $param[1];
+        } else if($param[0][0] == 'attendanceId' && $param[1][0] == 'productId'){
+            $sql = "SELECT pa.cod_produto, pa.quantidade, pa.valor_unitario, p.estoque, p.nome as nome FROM produto_atendimento pa INNER JOIN produto p ON pa.cod_produto = p.codigo WHERE pa.cod_atendimento = ". $param[0][1]." AND pa.cod_produto = ".$param[1][1];
         }
         $stmt = $this->getConn()->getDb()->query($sql);
 
@@ -71,18 +73,27 @@ class ProductAttendance
      * @param $data
      * @return int
      */
-    public function updateProductAttendance($attendanceId, $productId, $data)
+    public function updateProductAttendance($data)
     {
         $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET cod_atendimento = :attendanceId, cod_produto = :productId, quantidade = :quantity, valor_total = :fullValue, valor_unit = :unityValue WHERE cod_atendimento = :attendanceId AND cod_produto = :productId';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
-        $stmt->bindParam(':attendanceId',$attendanceId);
-        $stmt->bindValue(':productId', $productId);
+        $stmt->bindParam(':attendanceId',$data['attendanceId']);
+        $stmt->bindValue(':productId', $data['productId']);
         $stmt->bindValue(':quantity', $data['quantity']);
         $stmt->bindValue(':fullValue', $data['fullValue']);
         $stmt->bindValue(':unityValue', $data['unityValue']);
         $stmt->execute();
-        var_dump($stmt);exit;
+        return $stmt->rowCount();
+    }
+
+    public function deletePA($data) {
+        $sqlUpdate = 'DELETE FROM ' . self::TABLE . ' WHERE cod_atendimento = :attendanceId AND cod_produto = :productId';
+        $this->Conn->getDb()->beginTransaction();
+        $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
+        $stmt->bindParam(':attendanceId',$data['attendanceId']);
+        $stmt->bindValue(':productId', $data['productId']);
+        $stmt->execute();
         return $stmt->rowCount();
     }
 

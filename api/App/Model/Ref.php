@@ -18,6 +18,7 @@ class Ref
     public function __construct()
     {
         $this->Conn = new DBConnection();
+        $this->DateTime = new DateTime();
     }
 
     /**
@@ -26,8 +27,9 @@ class Ref
      */
     public function getAllRefs($table)
     {
+        $currentDate = $this->DateTime->getNow();
         if ($table) {
-            $sql = "SELECT * FROM valor_ref LIMIT 1";
+            $sql = "SELECT * FROM valor_ref WHERE inicio <= '" .$currentDate."' and  fim >= '". $currentDate."'";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);

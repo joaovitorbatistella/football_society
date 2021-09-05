@@ -72,6 +72,9 @@ class RequestValidator
             $method = $this->request['method'];
         } else if ($this->request['route'] === 'REF' && $this->request['resource'] === 'list' && $this->request['method'] === 'GET'){
             $method = $this->request['method'];
+        }else if ($this->request['route'] === 'PRODUCTATTENDANCE' && $this->request['resource'] === 'delete' && $this->request['method'] === 'DELETE'){
+            $this->requestData = Json::handleBodyRequest();
+            $method = $this->request['method'];
         }else {
             if ($this->request['method'] !== self::GET && $this->request['method'] !== self::DELETE) {
                 $this->requestData = Json::handleBodyRequest();
@@ -223,6 +226,11 @@ class RequestValidator
                     $handleGame->setBodyDataRequests($this->requestData);
                     $return = $handleGame->validatePut();
                     break;
+                case self::PRODUCTATTENDANCE:
+                    $handleProductAttendance = new handleProductAttendance($this->request);
+                    $handleProductAttendance->setBodyDataRequests($this->requestData);
+                    $return = $handleProductAttendance->validatePut();
+                    break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
             }
@@ -264,6 +272,11 @@ class RequestValidator
                     $handleGame = new handleGame($this->request);
                     $handleGame->setBodyDataRequests($this->requestData);
                     $return = $handleGame->validateDelete();
+                    break;
+                case self::PRODUCTATTENDANCE:
+                    $handleProductAttendance = new handleProductAttendance($this->request);
+                    $handleProductAttendance->setBodyDataRequests($this->requestData);
+                    $return = $handleProductAttendance->validateDelete();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);

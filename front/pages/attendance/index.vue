@@ -374,7 +374,7 @@
                           <v-row>
                             <v-col justify="center" align="center" cols="12" lg="12" md="12">
                               <v-combobox
-                                v-model="editedItem[0].customerId"
+                                v-model="editedItem[0].customer"
                                 :items="customersList"
                                 hide-selected
                                 item-text="nome"
@@ -465,9 +465,20 @@
                               required
                             ></v-text-field>
                           </v-col>
-                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                          <!-- <v-col v-if="editedIndex == -1" justify="center" align="center" cols="12" lg="2" md="2">
                             <v-text-field
                               v-model="quantity[index]"
+                              :value="0"
+                              :id="index"
+                              type="number"
+                              color="green lighten-3"
+                              label="Quantidade"
+                              required
+                            ></v-text-field>
+                          </v-col> -->
+                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-text-field
+                              v-model="product.quantity"
                               :value="0"
                               :id="index"
                               type="number"
@@ -565,7 +576,11 @@ export default {
     newGameCtrl: false,
     newGame: false,
     dialog: false,
+    attendanceEditing: null,
+    productToDeleteFromAttendance: null,
     insertedAttendanceId: null,
+    newProductInAttendance: false,
+    deleteProductInAttendance: false,
     gameHour: '',
     gameDateModal: false,
     gameTime: null,
@@ -601,13 +616,12 @@ export default {
       { text: 'Preço', value: 'preco' },
       { text: 'Estoque', value: 'estoque' },
     ],
-    gamesList: [],
     editedIndex: -1,
     editedItem: [
       {
         description: '',
         payed: false,
-        customerId: null
+        customer: null
       }
     ],
     gameEditedItem: [
@@ -633,22 +647,12 @@ export default {
         .get(`attendance/list/`, config)
         .then(({ data }) => {
           this.attendanceList = data.response
-          this.loading = false
+          
         })
         .catch(err => {
           console.log('error on GET: ', err)
         })
-
-    this.loading = true
-      await this.$axios
-        .get(`ref/list/`, config)
-        .then(({ data }) => {
-          this.gamePrice = data.response[0].valor
-          this.loading = false
-        })
-        .catch(err => {
-          console.log('error on GET: ', err)
-        })
+      this.loading = false
     } catch(e) {
       console.log("erro: ", e)
     }
@@ -665,9 +669,6 @@ export default {
         this.newGameCtrl = true
       } else if(n == false)
         this.newGameCtrl = false
-    },
-    quantity(){
-      console.log('fui chamado')
     },
     dialog (val) {
       val || this.close()
@@ -689,9 +690,9 @@ export default {
       };
       this.loading = true
       await this.$axios
-        .get(`game/list/`, config)
+        .get(`ref/list/`, config)
         .then(({ data }) => {
-          this.gamesList = data.response
+          this.gameEditedItem[0].price = data.response[0].valor
         })
         .catch(err => {
           console.log('error on GET: ', err)
@@ -725,31 +726,51 @@ export default {
       this.buyComplete = true
     },
     async editItem (id) {
-      try {
-        this.editedIndex = 1
-        let token = Cookies.get('jwt-token')   
+      this.loading = true
+      this.buyComplete = false
+      this.editedIndex = 1
+      this.attendanceEditing = id
+      let token = Cookies.get('jwt-token')
+
+      const configCustomer = {
+        headers: {
+          Authorization: 'Bearer '+ token
+          },
+      }
+
+      await this.$axios
+        .get(`customer/list/`, configCustomer)
+        .then(({ data }) => {
+          this.customersList = data.response
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+
         const config = {
-            headers: {
-              Authorization: 'Bearer '+ token
-              },
-              params: {
-                id: id
-              }
+          headers: {
+            Authorization: 'Bearer '+ token
+            },
+            params: {
+              id: id
+            }
         }
-        this.loading = true
+
         await this.$axios
           .get(`attendance/list/`, config)
           .then(({ data }) => {
-            //let dateTime = data.response[0].data_hora.split(' ')
+            console.log(data)
             this.editedItem[0] = {
               description: data.response[0].descricao,
               dateTime: data.response[0].data_hora,
-              payed: data.response[0].pago,
-              customerId: data.response[0].cod_cliente
+              payed: data.response[0].pago == 'Y' ? true : false,
+              customer: {
+                codigo: data.response[0].cod_cliente,
+                nome: data.response[0].nome
+              }
             }
+            console.log(this.editedItem[0])
             this.gameHour = data.response[0].horario_jogo
-            this.dialog = true
-            this.loading = false
           })
           .catch(err => {
             console.log('error on GET: ', err)
@@ -770,20 +791,21 @@ export default {
               let dateTime = data.response[0].data_hora.split(' ')
               this.gameEditedItem[0] = {
                 date: dateTime[0],
+                oldDate: dateTime[0],
                 hour: dateTime[1],
+                oldHour: dateTime[1],
                 description: data.response[0].descricao,
                 price: data.response[0].valor,
                 discount: data.response[0].desconto,
               }
-              this.dialog = true
-              this.loading = false
+              this.newGameCtrl = true
             })
             .catch(err => {
               console.log('error on GET: ', err)
             })
         }
 
-        const configProduct = {
+        const configProductAtt = {
           headers: {
             Authorization: 'Bearer '+ token
             },
@@ -792,28 +814,67 @@ export default {
             }
         };
         await this.$axios
-            .get(`productattendance/list/`, configProduct)
+            .get(`productattendance/list/`, configProductAtt)
             .then(({ data }) => {
-              this.selected = data.response[0]
-              this.dialog = true
-              this.loading = false
+              console.log("before", this.selected)
+              if(data.type === "success"){
+                 this.selected.length = 0
+                 this.selected = []
+                 console.log("antes do for", data.response)
+                for(var i=0; i < data.response.length; i++) {
+                  this.selected[i] = {
+                    codigo: data.response[i].cod_produto,
+                    nome: data.response[i].nome,
+                    preco:  data.response[i].valor_unitario,
+                    quantity: data.response[i].quantidade,
+                    oldQuantity: data.response[i].quantidade,
+                    estoque: data.response[i].estoque
+                  }
+                }
+                console.log("after", this.selected)
+              }
             })
             .catch(err => {
               console.log('error on GET: ', err)
-            }) 
-      } catch(e) {
-        console.log(e)
-      }
+            })
+
+            console.log(this.selected)
+
+        const configProduct = {
+          headers: {
+            Authorization: 'Bearer '+ token
+            }
+        }
+        await this.$axios
+          .get(`product/list/`, configProduct)
+          .then(({ data }) => {
+            this.productsList = data.response
+          })
+          .catch(err => {
+            console.log('error on GET: ', err)
+          })
+        this.loading = false
+        this.dialog = true
+    },
+    teste() {
+
     },
     buyProducts() {
+      console.log(this.selected[0])
       for(var i=0; i < this.selected.length; i++) {
-        if(this.quantity[i] <= this.selected[i].estoque) {
-          Object.assign(this.selected[i], {quantity: parseInt(this.quantity[i])})
-          this.closeProducts()
-        } else {
-          alert('Estoque insuficiente, o estoque do produto: '+ this.selected[i].nome+' é: '+ this.selected[i].estoque)
+        if(this.selected[i].hasOwnProperty('oldQuantity') == false){
+          this.selected[i].oldQuantity = 0
         }
-      }     
+        if(this.selected[i].quantity > 0) {     
+          if(this.selected[i].quantity > this.selected[i].estoque) {
+            alert('Estoque insuficiente, o estoque do produto: '+ this.selected[i].nome+' é: '+ this.selected[i].estoque)
+            return;
+          }
+        } else {
+          alert('Informe a quantidade')
+        }
+      } 
+      this.closeProducts()
     },
     deleteItem (key) {
       this.dialogDelete = true
@@ -860,131 +921,223 @@ export default {
     },
 
     async save () {
+      console.log(this.editedIndex)
       if (this.editedIndex > -1) {
-        
         let token = Cookies.get('jwt-token')   
         let headers= {
           'Authorization': 'Bearer '+ token
         }
-        if(this.newGameCtrl == true) {
-          const attendanceData = {
-            description: this.editedItem[0].description,
-            payed: this.editedItem[0].payed == true ? 'Y' : 'N',
-            customerId: this.editedItem[0].customerId.codigo
-          }
-          this.loading = true
-          await this.$axios
-            .post(`attendance/update/`, attendanceData, {headers})
-            .then(( {data} ) => {
-              this.insertedAttendanceId = data.response.insertedId
-            })
-            .catch(err => {
-              console.log('error on GET: ', err)
-            })
 
-          const gameData = {
-            dateAndTime: this.gameEditedItem[0].date + ' ' + this.gameEditedItem[0].hour+':00',
-            price: this.gameEditedItem[0].price,
-            description: this.gameEditedItem[0].description,
-            discount: this.gameEditedItem[0].discount == '' ? 0.00 :  this.gameEditedItem[0].discount,
-            attendanceId: this.insertedAttendanceId
-          }
-          console.log(gameData)
-          await this.$axios
-            .post(`game/update/`, gameData, {headers})
-            .then(({ data }) => {
-              console.log(data)
-            })
-            .catch(err => {
-              console.log('error on GET: ', err)
-            })
-          console.log(this.selected)
-          for(var i=0; i < this.selected.length; i++){
-            console.log("for")
-            const productAttndData = {
-              attendanceId: this.insertedAttendanceId,
-              productId: this.selected[i].codigo,
-              quantity: this.selected[i].quantity,
-              fullPrice: this.selected[i].preco * this.selected[i].quantity,
-              unityPrice: this.selected[i].preco
+        const attendanceData = {
+          description: this.editedItem[0].description,
+          payed: this.editedItem[0].payed == true ? 'Y' : 'N',
+          customerId: this.editedItem[0].customer.codigo
+        }
+        this.loading = true
+        await this.$axios
+          .put(`attendance/update/${this.attendanceEditing}`, attendanceData, {headers})
+          .then()
+          .catch(err => {
+            console.log('error on GET: ', err)
+          })
+
+        if(this.newGameCtrl == true) {
+          console.log('dentro do id do game')
+            const gameData = {
+              newDateAndTime: this.gameEditedItem[0].date + ' ' + this.gameEditedItem[0].hour+':00',
+              oldDateAndTime: this.gameEditedItem[0].oldDate + ' ' + this.gameEditedItem[0].oldHour,
+              price: this.gameEditedItem[0].price,
+              description: this.gameEditedItem[0].description,
+              discount: this.gameEditedItem[0].discount == '' ? 0.00 : parseFloat(this.gameEditedItem[0].discount),
+              attendanceId: this.attendanceEditing
             }
-            console.log("productAttndData", productAttndData)
-            console.log("tem que estar vazio", this.productData)
+            console.log('dentro do id do game', gameData)
             await this.$axios
-              .post(`productattendance/store/`, productAttndData, {headers})
-              .then(pad => {
-                console.log("PAD", pad)
-                if(pad.data.type == 'success') {
-                  console.log("-> prox. list/id", this.selected[i])
-                }
-              })
-              .catch(err => {
-                console.log('error on GET: ', err)
-              })
-            await this.$axios
-              .get(`product/list/${this.selected[i].codigo}`, {headers})
-              .then(pd => {
-                console.log("PD",pd)
-                this.productData = {
-                  name: pd.data.response.nome,
-                  description: pd.data.response.descricao,
-                  price: pd.data.response.preco,
-                  inventory: pd.data.response.estoque - this.selected[i].quantity,
-                }
-                console.log("product Data -> prox. update", this.productData)
-              })
-              .catch(err => {
-                console.log('error on GET: ', err)
-                this.loading = false
-              })
-            await this.$axios
-              .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+              .put(`game/update`, gameData, {headers})
               .then()
               .catch(err => {
                 console.log('error on GET: ', err)
-                this.loading = false
-              }) 
-          }
-          await this.updateTable()
+              })
         }
+       
+
+        if(this.selected.length > 0){
+          console.log("selected b", this.selected)
+          for(var i=0; i < this.selected.length; i++){
+            const cfgP = {
+              headers: {
+                Authorization: 'Bearer '+ token
+                },
+                params: {
+                  attendanceId: this.attendanceEditing,
+                }
+            }
+            await this.$axios
+            .get(`productattendance/list`, cfgP)
+            .then(({data}) => {
+              console.log("productattendance/list", data)
+              for(var m=0; m < data.response.length; m++){
+                if(data.response[m].cod_produto != this.selected[i].codigo){
+                  this.productToDeleteFromAttendance = data.response[m].cod_produto
+                  this.deleteProductInAttendance = true
+                }
+              }
+            })
+
+            if(this.deleteProductInAttendance == true) {
+              const cfgA = {
+                headers: {
+                  Authorization: 'Bearer '+ token
+                  },
+                  data: {
+                    attendanceId: this.attendanceEditing,
+                    productId: this.productToDeleteFromAttendance
+                  }
+              }
+              console.log(cfgA)
+              await this.$axios
+                .delete(`productattendance/delete`, cfgA)
+                .then(({data}) => {
+                  console.log("delete pa", data)
+                })
+                .catch(err => {
+                  console.log('error on GET: ', err)
+                })
+            }
+
+             const cfg = {
+              headers: {
+                Authorization: 'Bearer '+ token
+                },
+                params: {
+                  attendanceId: this.attendanceEditing,
+                  productId: this.selected[i].codigo
+                }
+            }
+            await this.$axios
+            .get(`productattendance/list`, cfg)
+            .then(({data}) => {
+              if(data.type == 'error'){
+                this.newProductInAttendance = true
+              }
+            })
+
+            
+
+            if(this.newProductInAttendance == true){
+              const productAttndDataU = {
+                attendanceId: this.attendanceEditing,
+                productId: this.selected[i].codigo,
+                quantity: this.selected[i].quantity,
+                fullPrice: this.selected[i].preco * this.selected[i].quantity,
+                unityPrice: this.selected[i].preco
+              }
+            
+              await this.$axios
+                .post(`productattendance/store/`, productAttndDataU, {headers})
+                .then(pad => {
+                  console.log("PAD", pad)
+                  if(pad.data.type == 'success') {
+                    console.log("-> prox. list/id", this.selected[i])
+                  }
+                })
+                .catch(err => {
+                  console.log('error on GET: ', err)
+                })
+            }
+
+          const productAttndData = {
+            attendanceId: this.attendanceEditing,
+            productId: this.selected[i].codigo,
+            quantity: parseInt(this.selected[i].quantity),
+            fullPrice: parseFloat(this.selected[i].preco) * parseInt(this.selected[i].quantity),
+            unityPrice: parseFloat(this.selected[i].preco)
+          }
+          console.log("productAttndData", productAttndData)
+          await this.$axios
+            .put(`productattendance/update`, productAttndData, {headers})
+            .then(pad => {
+              console.log("PAD", pad)
+              if(pad.data.type == 'success') {
+                console.log("-> prox. list/id", this.selected[i])
+              }
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            })
+          await this.$axios
+            .get(`product/list/${this.selected[i].codigo}`, {headers})
+            .then(pd => {
+              console.log("PD",pd)
+              this.productData = {
+                name: pd.data.response.nome,
+                description: pd.data.response.descricao,
+                price: pd.data.response.preco,
+                inventory: this.selected[i].oldQuantity < this.selected[i].quantity ? pd.data.response.estoque - (this.selected[i].quantity - this.selected[i].oldQuantity) : pd.data.response.estoque + (this.selected[i].oldQuantity - this.selected[i].quantity)
+              }
+              console.log("q1", this.selected[i])
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+            console.log("this.productData", this.productData)
+          await this.$axios
+            .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+            .then()
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+          }     
+        }
+        console.log("selected", this.selected)
+        this.newProductInAttendance = false
+        this.deleteProductInAttendance = false
+        this.productToDeleteFromAttendance = null
+        await this.updateTable()
+        
       } else {
         let token = Cookies.get('jwt-token')   
         let headers= {
           'Authorization': 'Bearer '+ token
         }
-        if(this.newGameCtrl == true) {
-          const attendanceData = {
+
+        const attendanceData = {
             description: this.editedItem[0].description,
             payed: this.editedItem[0].payed == true ? 'Y' : 'N',
-            customerId: this.editedItem[0].customerId.codigo
+            customerId: this.editedItem[0].customer.codigo
           }
-          this.loading = true
-          await this.$axios
-            .post(`attendance/store/`, attendanceData, {headers})
-            .then(( {data} ) => {
-              this.insertedAttendanceId = data.response.insertedId
-            })
-            .catch(err => {
-              console.log('error on GET: ', err)
-            })
+        this.loading = true
+        await this.$axios
+          .post(`attendance/store/`, attendanceData, {headers})
+          .then(( {data} ) => {
+            this.insertedAttendanceId = data.response.insertedId
+          })
+          .catch(err => {
+            console.log('error on GET: ', err)
+          })
 
-          const gameData = {
-            dateAndTime: this.gameEditedItem[0].date + ' ' + this.gameEditedItem[0].hour+':00',
-            price: this.gameEditedItem[0].price,
-            description: this.gameEditedItem[0].description,
-            discount: this.gameEditedItem[0].discount == '' ? 0.00 :  this.gameEditedItem[0].discount,
-            attendanceId: this.insertedAttendanceId
-          }
-          console.log(gameData)
-          await this.$axios
-            .post(`game/store/`, gameData, {headers})
-            .then(({ data }) => {
-              console.log(data)
-            })
-            .catch(err => {
-              console.log('error on GET: ', err)
-            })
-          console.log(this.selected)
+        if(this.newGameCtrl == true) {
+            const gameData = {
+              dateAndTime: this.gameEditedItem[0].date + ' ' + this.gameEditedItem[0].hour+':00',
+              price: this.gameEditedItem[0].price,
+              description: this.gameEditedItem[0].description,
+              discount: this.gameEditedItem[0].discount == '' ? 0.00 :  this.gameEditedItem[0].discount,
+              attendanceId: this.insertedAttendanceId
+            }
+            await this.$axios
+              .post(`game/store/`, gameData, {headers})
+              .then(({ data }) => {
+                console.log(data)
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+        }
+
+        if(this.selected.length > 0){
+          console.log("selected b", this.selected)
           for(var i=0; i < this.selected.length; i++){
             console.log("for")
             const productAttndData = {
@@ -994,47 +1147,51 @@ export default {
               fullPrice: this.selected[i].preco * this.selected[i].quantity,
               unityPrice: this.selected[i].preco
             }
-            console.log("productAttndData", productAttndData)
-            console.log("tem que estar vazio", this.productData)
-            await this.$axios
-              .post(`productattendance/store/`, productAttndData, {headers})
-              .then(pad => {
-                console.log("PAD", pad)
-                if(pad.data.type == 'success') {
-                  console.log("-> prox. list/id", this.selected[i])
-                }
-              })
-              .catch(err => {
-                console.log('error on GET: ', err)
-              })
-            await this.$axios
-              .get(`product/list/${this.selected[i].codigo}`, {headers})
-              .then(pd => {
-                console.log("PD",pd)
-                this.productData = {
-                  name: pd.data.response.nome,
-                  description: pd.data.response.descricao,
-                  price: pd.data.response.preco,
-                  inventory: pd.data.response.estoque - this.selected[i].quantity,
-                }
-                console.log("product Data -> prox. update", this.productData)
-              })
-              .catch(err => {
-                console.log('error on GET: ', err)
-                this.loading = false
-              })
-            await this.$axios
-              .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
-              .then()
-              .catch(err => {
-                console.log('error on GET: ', err)
-                this.loading = false
-              }) 
-          }
-          await this.updateTable()
+          console.log("productAttndData", productAttndData)
+          console.log("tem que estar vazio", this.productData)
+        
+          await this.$axios
+            .post(`productattendance/store/`, productAttndData, {headers})
+            .then(pad => {
+              console.log("PAD", pad)
+              if(pad.data.type == 'success') {
+                console.log("-> prox. list/id", this.selected[i])
+              }
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+            })
+          await this.$axios
+            .get(`product/list/${this.selected[i].codigo}`, {headers})
+            .then(pd => {
+              console.log("PD",pd)
+              this.productData = {
+                name: pd.data.response.nome,
+                description: pd.data.response.descricao,
+                price: pd.data.response.preco,
+                inventory: pd.data.response.estoque - this.selected[i].quantity,
+              }
+              console.log("product Data -> prox. update", this.productData)
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+          await this.$axios
+            .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+            .then()
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+          }     
         }
+        console.log("selected", this.selected)
+        await this.updateTable()
       }
       this.close()
+      this.buyComplete = false
+
     },
     async updateTable() {
       try {
