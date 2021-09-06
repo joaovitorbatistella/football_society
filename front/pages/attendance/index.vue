@@ -513,7 +513,8 @@
               </v-dialog>
               <v-dialog v-model="dialogDelete" max-width="500px">
                 <v-card>
-                  <v-card-title class="text-h5">Você deseja excluir este jogo?</v-card-title>
+                  <v-card-title class="text-h5">Você deseja excluir este atendimento?</v-card-title>
+                  <v-card-text class="text-h5">Produtos cadastrados à atendimentos, serão removidos do relacionamento e seus estoques NÃO serão ajustados! CUIDADO!</v-card-text>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="green lighten-3" text @click="closeDelete">Cancel</v-btn>
@@ -876,9 +877,35 @@ export default {
       } 
       this.closeProducts()
     },
-    deleteItem (key) {
-      this.dialogDelete = true
-      this.toDelte = key
+    async deleteItem (key) {
+      this.loading = true
+      let token = Cookies.get('jwt-token')   
+      const config = {
+          headers: {
+            Authorization: 'Bearer '+ token
+            },
+            params: {
+              attendanceId: key
+            }
+        }
+      await this.$axios
+            .get(`game/list`, config)
+            .then(({data}) => {
+              if(data.type == 'success'){
+                for(var o=0; o < data.response.length; o++){
+                  console.log('entrei')
+                  alert('Você tem um jogo agendado para '+this.formattedDate(data.response[o].data_hora)+' para este atendimento, delete-o primeiro!')
+                  return;
+                }   
+              }
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+        this.dialogDelete = true
+        this.toDelte = key
+        this.loading = false
     },
 
     async deleteItemConfirm (key) {
@@ -888,7 +915,7 @@ export default {
             }
       this.loading = true
       await this.$axios
-        .delete(`game/delete/${key}`, { headers })
+        .delete(`attendance/delete/${key}`, { headers })
         .then(({data}) => {
           console.log(data)
           if(data.type == 'success') {
@@ -959,7 +986,6 @@ export default {
                 console.log('error on GET: ', err)
               })
         }
-       
 
         if(this.selected.length > 0){
           console.log("selected b", this.selected)
@@ -971,80 +997,58 @@ export default {
                 params: {
                   attendanceId: this.attendanceEditing,
                 }
-            }
-            await this.$axios
-            .get(`productattendance/list`, cfgP)
-            .then(({data}) => {
-              console.log("productattendance/list", data)
-              for(var m=0; m < data.response.length; m++){
-                if(data.response[m].cod_produto != this.selected[i].codigo){
-                  this.productToDeleteFromAttendance = data.response[m].cod_produto
-                  this.deleteProductInAttendance = true
-                }
               }
-            })
+              await this.$axios
+              .get(`productattendance/list`, cfgP)
+              .then(({data}) => {
 
-            if(this.deleteProductInAttendance == true) {
-              const cfgA = {
-                headers: {
-                  Authorization: 'Bearer '+ token
-                  },
-                  data: {
+
+                let indx = data.response.findIndex(val => val.cod_produto == this.selected[i].codigo)
+                if(indx < 0) {
+                  const productAttndDataU = {
                     attendanceId: this.attendanceEditing,
-                    productId: this.productToDeleteFromAttendance
+                    productId: this.selected[i].codigo,
+                    quantity: this.selected[i].quantity,
+                    fullPrice: this.selected[i].preco * this.selected[i].quantity,
+                    unityPrice: this.selected[i].preco
                   }
-              }
-              console.log(cfgA)
-              await this.$axios
-                .delete(`productattendance/delete`, cfgA)
-                .then(({data}) => {
-                  console.log("delete pa", data)
-                })
-                .catch(err => {
-                  console.log('error on GET: ', err)
-                })
-            }
-
-             const cfg = {
-              headers: {
-                Authorization: 'Bearer '+ token
-                },
-                params: {
-                  attendanceId: this.attendanceEditing,
-                  productId: this.selected[i].codigo
+                
+                  this.$axios
+                    .post(`productattendance/store/`, productAttndDataU, {headers})
+                    .then(pad => {
+                      console.log("PAD", pad)
+                      if(pad.data.type == 'success') {
+                        console.log("-> prox. list/id", this.selected[i])
+                      }
+                    })
+                    .catch(err => {
+                      console.log('error on GET: ', err)
+                    })
                 }
-            }
-            await this.$axios
-            .get(`productattendance/list`, cfg)
-            .then(({data}) => {
-              if(data.type == 'error'){
-                this.newProductInAttendance = true
-              }
-            })
-
-            
-
-            if(this.newProductInAttendance == true){
-              const productAttndDataU = {
-                attendanceId: this.attendanceEditing,
-                productId: this.selected[i].codigo,
-                quantity: this.selected[i].quantity,
-                fullPrice: this.selected[i].preco * this.selected[i].quantity,
-                unityPrice: this.selected[i].preco
-              }
-            
-              await this.$axios
-                .post(`productattendance/store/`, productAttndDataU, {headers})
-                .then(pad => {
-                  console.log("PAD", pad)
-                  if(pad.data.type == 'success') {
-                    console.log("-> prox. list/id", this.selected[i])
+                for(var m=0; m < data.response.length; m++){
+                  let indxDelete = this.selected.findIndex(val => val.codigo == data.response[m].cod_produto)
+                  if (indxDelete < 0){
+                    const cfgA = {
+                      headers: {
+                        Authorization: 'Bearer '+ token
+                        },
+                        data: {
+                          attendanceId: this.attendanceEditing,
+                          productId: data.response[m].cod_produto
+                        }
+                    }
+                    console.log(cfgA)
+                    this.$axios
+                      .delete(`productattendance/delete`, cfgA)
+                      .then(({data}) => {
+                        console.log("delete pa", data)
+                      })
+                      .catch(err => {
+                        console.log('error on GET: ', err)
+                      })
                   }
-                })
-                .catch(err => {
-                  console.log('error on GET: ', err)
-                })
-            }
+                }
+              })
 
           const productAttndData = {
             attendanceId: this.attendanceEditing,

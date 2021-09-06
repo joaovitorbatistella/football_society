@@ -52,6 +52,8 @@ class Game
         }
         else if($param[0] == 'dateTime'){
             $sql = "SELECT * FROM " . self::TABLE . " WHERE data_hora = '".$param[1]."'";
+        } else if($param[0] == 'attendanceId'){
+            $sql = "SELECT * FROM " . self::TABLE . " WHERE cod_atendimento = '".$param[1]."'";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
 

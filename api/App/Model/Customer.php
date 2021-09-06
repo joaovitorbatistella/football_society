@@ -27,7 +27,7 @@ class Customer
     public function getAllCustomers($table)
     {
         if ($table) {
-            $sql = "SELECT cl.codigo, cl.nome, cl.dt_nascimento, cl.telefone, cl.email, cl.logradouro, cl.sexo, cl.cpf, ci.nome AS nome_cidade, ci.uf FROM cliente cl INNER JOIN cidade ci ON cl.cod_cidade = ci.codigo";
+            $sql = "SELECT cl.codigo AS cod_cliente, cl.nome, cl.dt_nascimento, cl.telefone, cl.email, cl.logradouro, cl.sexo, cl.cpf, cl.cod_cidade, ci.nome AS nome_cidade, ci.uf, ci.codigo FROM cliente cl INNER JOIN cidade ci ON cl.cod_cidade = ci.codigo ORDER BY codigo desc";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);

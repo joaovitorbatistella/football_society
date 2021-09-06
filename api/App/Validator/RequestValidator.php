@@ -12,6 +12,7 @@ use Service\handleAttendance;
 use Service\handleGame;
 use Service\handleRef;
 use Service\handleProductAttendance;
+use Service\handleCity;
 use Infra\GenericConsts;
 use Infra\Json;
 
@@ -32,6 +33,7 @@ class RequestValidator
     const GAME = 'GAME';
     const REF = 'REF';
     const PRODUCTATTENDANCE = 'PRODUCTATTENDANCE';
+    const CITY = 'CITY';
 
     /**
      * RequestValidator constructor.
@@ -127,6 +129,10 @@ class RequestValidator
                 case self::PRODUCTATTENDANCE:
                     $handleProductAttendance = new handleProductAttendance($this->request);
                     $return = $handleProductAttendance->validateGet();
+                    break;
+                case self::CITY:
+                    $handleCity = new handleCity($this->request);
+                    $return = $handleCity->validateGet();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);

@@ -27,7 +27,7 @@ class Product
     public function getAllProduct($table)
     {
         if ($table) {
-            $sql = 'SELECT * FROM ' . $table;
+            $sql = 'SELECT codigo AS cod_produto, nome, descricao, preco, estoque FROM ' . $table;
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -20,6 +20,47 @@ class City
         $this->Conn = new DBConnection();
     }
 
+        /**
+     * @param $table
+     * @return Array
+     */
+    public function getAllCities($table)
+    {
+        if ($table) {
+            $sql = "SELECT * FROM cidade ORDER BY codigo desc";
+            $stmt = $this->getConn()->getDb()->query($sql);
+            if($stmt) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
+            }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+    }
+
+     /**
+     * @param $param
+     * @return int
+     */
+    public function getCitiesByParams($param)
+    {
+        if($param[0] == 'id'){
+            $id = (int)$param[1];
+            $sql = "SELECT * FROM cidade WHERE codigo = ". $id." ORDER BY codigo desc" ;
+        }
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
+    }
+    
+
     /**
      * @param $name
      * @param $UF
