@@ -27,7 +27,7 @@ class Provider
     public function getAllProviders($table)
     {
         if ($table) {
-            $sql = "SELECT f.codigo, f.nome, f.logradouro, f.telefone, ci.nome AS nome_cidade, ci.uf FROM fornecedor f INNER JOIN cidade ci ON f.cod_cidade = ci.codigo";
+            $sql = "SELECT f.codigo AS cod_fornecedor, f.nome, f.logradouro, f.telefone, f.cod_cidade, ci.nome AS nome_cidade, ci.uf FROM fornecedor f INNER JOIN cidade ci ON f.cod_cidade = ci.codigo ORDER BY f.codigo desc";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -48,11 +48,11 @@ class Provider
     public function getProvidersByParams($param)
     {
         if($param[0] == 'id'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $param[1]."";
+            $sql = "SELECT codigo AS cod_fornecedor, nome, logradouro, telefone, cod_cidade FROM " . self::TABLE . " WHERE codigo = ". $param[1]." ORDER BY codigo desc";
         } else if($param[0] == 'name'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE nome LIKE '%".$param[1]."%'";
+            $sql = "SELECT codigo AS cod_fornecedor, nome, logradouro, telefone, cod_cidade FROM " . self::TABLE . " WHERE nome LIKE '%".$param[1]."%' ORDER BY codigo desc";
         } else if($param[0] == 'cityId'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE cod_cidade = ". $param[1];
+            $sql = "SELECT codigo AS cod_fornecedor, nome, logradouro, telefone, cod_cidade FROM " . self::TABLE . " WHERE cod_cidade = ". $param[1]." ORDER BY codigo desc";
         }
         
         $stmt = $this->getConn()->getDb()->query($sql);

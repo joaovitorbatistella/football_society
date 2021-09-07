@@ -56,7 +56,8 @@
             >
               <v-spacer></v-spacer>
               <v-dialog
-                v-model="dialog"
+                 color= "lime accent-3"
+                 v-model="dialog"
                 max-width="500px"
               >
                 <template v-slot:activator="{ on, attrs }">
@@ -82,7 +83,8 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem[0].data_hora"
+                             color= "lime accent-3"
+                             v-model="editedItem[0].data_hora"
                             label="Data e Hora"
                           ></v-text-field>
                         </v-col>
@@ -92,7 +94,8 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem[0].valor"
+                             color= "lime accent-3"
+                             v-model="editedItem[0].valor"
                             label="Valor  (R$)"
                           ></v-text-field>
                         </v-col>
@@ -102,7 +105,8 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem[0].desconto"
+                             color= "lime accent-3"
+                             v-model="editedItem[0].desconto"
                             label="Desconto (R$)"
                           ></v-text-field>
                         </v-col>
@@ -112,7 +116,8 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem[0].descricao"
+                             color= "lime accent-3"
+                             v-model="editedItem[0].descricao"
                             label="Descrição"
                           ></v-text-field>
                         </v-col>                        
@@ -122,7 +127,8 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem[0].cod_atendimento"
+                             color= "lime accent-3"
+                             v-model="editedItem[0].cod_atendimento"
                             label="Atendimento"
                           ></v-text-field>
                         </v-col>
@@ -133,14 +139,14 @@
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                      color="blue darken-1"
+                      color="lime accent-3"
                       text
                       @click="close"
                     >
                       Cancel
                     </v-btn>
                     <v-btn
-                      color="blue darken-1"
+                      color="lime accent-3"
                       text
                       @click="save"
                     >
@@ -149,13 +155,14 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
+              <v-dialog  color= "lime accent-3"
+              v-model="dialogDelete" max-width="500px">
                 <v-card>
                   <v-card-title class="text-h5">Você deseja excluir este jogo?</v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
+                    <v-btn color="lime accent-3" text @click="closeDelete">Cancel</v-btn>
+                    <v-btn color="lime accent-3" text @click="deleteItemConfirm(toDelte)">OK</v-btn>
                     <v-spacer></v-spacer>
                   </v-card-actions>
                 </v-card>

@@ -190,14 +190,14 @@ export default {
       ],
       productsList: [],
       productsHeaders: [
-        { text: 'Código', value: 'codigo' },
+        { text: 'Código', value: 'cod_produto' },
         { text: 'Nome', value: 'nome' },
         { text: 'Preço', value: 'preco' },
         { text: 'Estoque', value: 'estoque' },
       ],
       providersList: [],
       providersHeaders: [
-        { text: 'Código', value: 'codigo' },
+        { text: 'Código', value: 'cod_fornecedor' },
         { text: 'Nome', value: 'nome' },
         { text: 'Telefone', value: 'telefone' },
       ],
