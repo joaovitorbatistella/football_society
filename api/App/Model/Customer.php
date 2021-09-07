@@ -48,13 +48,13 @@ class Customer
     public function getCustomerByParams($param)
     {
         if($param[0] == 'id'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $param[1]."";
+            $sql = "SELECT cl.codigo AS cod_cliente, cl.nome, cl.dt_nascimento, cl.telefone, cl.email, cl.logradouro, cl.sexo, cl.cpf, cl.cod_cidade, ci.nome AS nome_cidade, ci.uf, ci.codigo FROM cliente cl INNER JOIN cidade ci ON cl.cod_cidade = ci.codigo WHERE cl.codigo = ". $param[1]." ORDER BY codigo desc";
         } else if($param[0] == 'name'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE nome LIKE '%".$param[1]."%'";
+            $sql = "SELECT cl.codigo AS cod_cliente, cl.nome, cl.dt_nascimento, cl.telefone, cl.email, cl.logradouro, cl.sexo, cl.cpf, cl.cod_cidade, ci.nome AS nome_cidade, ci.uf, ci.codigo FROM cliente cl INNER JOIN cidade ci ON cl.cod_cidade = ci.codigo WHERE cl.nome LIKE '%".$param[1]."%' ORDER BY codigo desc";
         } else if($param[0] == 'cpf'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE cpf LIKE '%".$param[1]."%'";
+            $sql = "SELECT cl.codigo AS cod_cliente, cl.nome, cl.dt_nascimento, cl.telefone, cl.email, cl.logradouro, cl.sexo, cl.cpf, cl.cod_cidade, ci.nome AS nome_cidade, ci.uf, ci.codigo FROM cliente cl INNER JOIN cidade ci ON cl.cod_cidade = ci.codigo WHERE cpf LIKE '%".$param[1]."%' ORDER BY codigo desc";
         } else if($param[0] == 'email'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE email LIKE '%".$param[1]."%'";
+            $sql = "SELECT cl.codigo AS cod_cliente, cl.nome, cl.dt_nascimento, cl.telefone, cl.email, cl.logradouro, cl.sexo, cl.cpf, cl.cod_cidade, ci.nome AS nome_cidade, ci.uf, ci.codigo FROM cliente cl INNER JOIN cidade ci ON cl.cod_cidade = ci.codigo WHERE email LIKE '%".$param[1]."%' ORDER BY codigo desc";
         }
         
         $stmt = $this->getConn()->getDb()->query($sql);

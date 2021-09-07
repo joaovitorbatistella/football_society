@@ -18,6 +18,7 @@ class Game
     public function __construct()
     {
         $this->Conn = new DBConnection();
+        $this->DateTime = new DateTime();
     }
 
     /**
@@ -47,6 +48,7 @@ class Game
      */
     public function getGamesByParams($param)
     {
+        $dateNow = $this->DateTime->getNow();
         if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){
             $sql = "SELECT * FROM " . self::TABLE . " WHERE data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'";
         }
@@ -54,6 +56,8 @@ class Game
             $sql = "SELECT * FROM " . self::TABLE . " WHERE data_hora = '".$param[1]."'";
         } else if($param[0] == 'attendanceId'){
             $sql = "SELECT * FROM " . self::TABLE . " WHERE cod_atendimento = '".$param[1]."'";
+        } else if($param[0] == 'last'){
+            $sql = "SELECT j.data_hora, j.valor, j.descricao, j.desconto, a.descricao AS descricao_atendimento, cl.nome AS nome_cliente FROM jogo j INNER JOIN atendimento a ON j.cod_atendimento = a.codigo INNER JOIN cliente cl ON a.cod_cliente = cl.codigo WHERE j.data_hora > '".$dateNow."' ORDER BY j.data_hora LIMIT 1";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
 

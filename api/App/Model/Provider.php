@@ -48,11 +48,11 @@ class Provider
     public function getProvidersByParams($param)
     {
         if($param[0] == 'id'){
-            $sql = "SELECT codigo AS cod_fornecedor, nome, logradouro, telefone, cod_cidade FROM " . self::TABLE . " WHERE codigo = ". $param[1]." ORDER BY codigo desc";
+            $sql = "SELECT f.codigo AS cod_fornecedor, f.nome, f.logradouro, f.telefone, f.cod_cidade, ci.nome AS nome_cidade, ci.uf FROM fornecedor f INNER JOIN cidade ci ON f.cod_cidade = ci.codigo WHERE f.codigo = ". $param[1]." ORDER BY f.codigo desc";
         } else if($param[0] == 'name'){
-            $sql = "SELECT codigo AS cod_fornecedor, nome, logradouro, telefone, cod_cidade FROM " . self::TABLE . " WHERE nome LIKE '%".$param[1]."%' ORDER BY codigo desc";
+            $sql = "SELECT f.codigo AS cod_fornecedor, f.nome, f.logradouro, f.telefone, f.cod_cidade, ci.nome AS nome_cidade, ci.uf FROM fornecedor f INNER JOIN cidade ci ON f.cod_cidade = ci.codigo WHERE f.nome LIKE '%".$param[1]."%' ORDER BY f.codigo desc";
         } else if($param[0] == 'cityId'){
-            $sql = "SELECT codigo AS cod_fornecedor, nome, logradouro, telefone, cod_cidade FROM " . self::TABLE . " WHERE cod_cidade = ". $param[1]." ORDER BY codigo desc";
+            $sql = "SELECT f.codigo AS cod_fornecedor, f.nome, f.logradouro, f.telefone, f.cod_cidade, ci.nome AS nome_cidade, ci.uf FROM fornecedor f INNER JOIN cidade ci ON f.cod_cidade = ci.codigo WHERE cod_cidade = ". $param[1]." ORDER BY f.codigo desc";
         }
         
         $stmt = $this->getConn()->getDb()->query($sql);

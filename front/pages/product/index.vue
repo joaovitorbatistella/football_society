@@ -43,12 +43,77 @@
                   >
                     Gerar PDF 
                   </v-btn>
-                  <v-btn dark
+                   <v-btn dark
                     class="mb-2"
                     v-bind="attrs"
                     v-on="on"
                   >
                     CADASTRAR 
+                  </v-btn>
+                  <form>
+                    <v-layout :style="{
+                        marginTop: '20px'
+                      }"
+                    >
+                      <v-select
+                        color="lime accent-3"
+                        v-model="searchOptionSelected"
+                        :items="searchOptions"
+                        placeholder="Selecione o filtro"
+                        return-object
+                        item-text="value"
+                        item-value="id"
+                        :style="{
+                          maxWidth: '120px',
+                          marginRight: '8px'
+                        }"
+                        dense
+                        solo
+                      ></v-select>
+
+                      <v-text-field
+                        color="lime accent-3"
+                        v-model="searchId"
+                        v-if="searchOptionSelected.id == 1"
+                        :style="{
+                          marginRight: '8px',
+                          maxWidth: '180px'
+                        }"
+                        label="Informe um Código"
+                        solo
+                        dense
+                      ></v-text-field>
+
+                      <v-text-field
+                        color="lime accent-3"
+                        v-model="searchName"
+                        v-if="searchOptionSelected.id == 2"
+                        :style="{
+                          marginRight: '8px',
+                          maxWidth: '180px'
+                        }"
+                        label="Informe um nome, ou parte dele"
+                        solo
+                        dense
+                      ></v-text-field>                      
+                      <v-btn
+                        class="mr-4"
+                        @click="search"
+                      >
+                        Procurar
+                      </v-btn>
+                    </v-layout>
+                  </form>
+                  <v-btn
+                    :style="{
+                      marginRight: '18px',
+                    }"
+                    small
+                    icon
+                    outlined
+                    class="mx-1" color="red darken-1" @click.stop="updateTable"
+                  >
+                    <v-icon>mdi-filter-remove-outline</v-icon>
                   </v-btn>
                 </template>
                 <v-card
@@ -194,6 +259,13 @@ export default {
   data: () => ({
     loading: false,
     loaderMessage: 'Carregando',
+    searchOptions: [
+      { id: 1, value: 'Cod.' },
+      { id: 2, value: 'Nome' },
+    ],
+    searchOptionSelected: [],
+    searchName: '',
+    searchId: null,
     dialog: false,
     dialogDelete: false,
     editingProduct: null,
@@ -241,6 +313,58 @@ export default {
     },
   },
   methods: {
+    async search() {
+      let token = Cookies.get('jwt-token')   
+      this.loading = true
+      switch (this.searchOptionSelected.id) {
+        case 1:
+          const configIdproduct = {
+            headers: {
+              Authorization: 'Bearer '+ token
+              },
+              params: {
+                id: this.searchId
+              }
+            };
+            console.log(configIdproduct)
+            await this.$axios
+              .get(`product/list/`, configIdproduct)
+              .then(({ data }) => {
+                this.productsList = []
+                this.productsList = data.response   
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+            this.loading = false
+          break;
+
+        case 2:
+          const configNameproduct = {
+            headers: {
+              Authorization: 'Bearer '+ token
+              },
+              params: {
+                name: this.searchName
+              }
+            };
+            console.log(configNameproduct)
+            await this.$axios
+              .get(`product/list/`, configNameproduct)
+              .then(({ data }) => {
+                this.productsList = []
+                this.productsList = data.response   
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+            this.loading = false
+          break;
+      
+        default:
+          break;
+      }
+    },
     generatePDF() {
       const columns = [
         { title: "Codigo", dataKey: "cod_produto" },
@@ -440,6 +564,7 @@ export default {
       this.close()
     },
     async updateTable() {
+        this.searchOptionSelected = []
         this.loading = true
         this.productList = []
         let token = Cookies.get('jwt-token')   

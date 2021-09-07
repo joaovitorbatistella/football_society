@@ -1,8 +1,9 @@
 <template>
   <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="10">
-      <h1>TESTE</h1>
-    </v-col>
+      <v-img
+        max-width="500"
+        :src="require('~/assets/img/logo_society.png')"
+      ></v-img>
   </v-row>
 </template>
 

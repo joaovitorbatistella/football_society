@@ -47,9 +47,180 @@
                     class="mb-2"
                     v-bind="attrs"
                     v-on="on"
-                    @click="onStore"
                   >
                     CADASTRAR 
+                  </v-btn>
+                  <form>
+                    <v-layout :style="{
+                        marginTop: '20px'
+                      }"
+                    >
+                      <v-select
+                        color="lime accent-3"
+                        v-model="searchOptionSelected"
+                        :items="searchOptions"
+                        placeholder="Selecione o filtro"
+                        return-object
+                        item-text="value"
+                        item-value="id"
+                        :style="{
+                          maxWidth: '120px',
+                          marginRight: '8px'
+                        }"
+                        dense
+                        solo
+                      ></v-select>
+                      <v-menu
+                        v-if="searchOptionSelected.id == 1"
+                        ref="dateStartMenu"
+                        color="lime accent-3"
+                        v-model="menu"
+                        :close-on-content-click="false"
+                        :return-value.sync="date"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            :style="{
+                              maxWidth: '140px',
+                              marginRight: '8px'
+                            }"
+                            color="lime accent-3"
+                            v-model="date"
+                            label="Picker in menu"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                            dense
+                            solo
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          color="lime accent-3"
+                          v-model="date"
+                          no-title
+                          scrollable
+                        >
+                          <v-spacer></v-spacer>
+                          <v-btn
+                            text
+                            color="primary"
+                            @click="menu = false"
+                          >
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            text
+                            color="primary"
+                            @click="$refs.dateStartMenu.save(date)"
+                          >
+                            OK
+                          </v-btn>
+                        </v-date-picker>
+                      </v-menu>
+                      <v-menu
+                        v-if="searchOptionSelected.id == 1"
+                        ref="dateEndMenu"
+                        color="lime accent-3"
+                        v-model="menu2"
+                        :close-on-content-click="false"
+                        :return-value.sync="date2"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            :style="{
+                              maxWidth: '140px',
+                              marginRight: '8px'
+                            }"
+                            color="lime accent-3"
+                            v-model="date2"
+                            label="Picker in menu"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                            dense
+                            solo
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          color="lime accent-3"
+                          v-model="date2"
+                          no-title
+                          scrollable
+                        >
+                          <v-spacer></v-spacer>
+                          <v-btn
+                            text
+                            color="primary"
+                            @click="menu2 = false"
+                          >
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            text
+                            color="primary"
+                            @click="$refs.dateEndMenu.save(date2)"
+                          >
+                            OK
+                          </v-btn>
+                        </v-date-picker>
+                      </v-menu>
+                      <v-select
+                        :style="{
+                          maxWidth: '140px',
+                          marginRight: '8px'
+                        }"
+                        v-if="searchOptionSelected.id == 2"
+                        color="lime accent-3"
+                        v-model="attendanceSelected"
+                        item-text="nome_cliente"
+                        return-object
+                        item-value="codigo"
+                        :items="attendanceList"
+                        label="Selecione o atendimento"
+                        dense
+                        solo
+                      >
+                        <template v-slot:item="{ on, item }">
+                          <v-list-item v-on="on" :nome_cliente="item.nome_cliente">{{ item.nome_cliente + ' -> ' + formattedJustDate(item.data_hora) }}</v-list-item>
+                        </template> 
+                      </v-select>
+                      <v-text-field
+                        v-if="searchOptionSelected.id == 3"
+                        :style="{
+                          marginRight: '8px'
+                        }"
+                        label="Solo"
+                        placeholder="Placeholder"
+                        solo
+                        dense
+                      ></v-text-field>
+                      
+                      <v-btn
+                        class="mr-4"
+                        @click="search"
+                      >
+                        Procurar
+                      </v-btn>
+                    </v-layout>
+                  </form>
+                  <v-btn
+                    :style="{
+                      marginRight: '18px',
+                    }"
+                    small
+                    icon
+                    outlined
+                    class="mx-1" color="red darken-1" @click.stop="updateTable"
+                  >
+                    <v-icon>mdi-filter-remove-outline</v-icon>
                   </v-btn>
                 </template>
                 <v-card
@@ -621,6 +792,14 @@ export default {
     buyComplete: false,
     productsDialog: false,
     dialogDelete: false,
+    date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+    menu: false,
+    date2: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+    menu2: false,
+    searchOptions: [
+      { id: 1, value: 'Data' },
+    ],
+    searchOptionSelected: [],
     attendanceList: [],
     attendanceHeaders: [
       { text: 'Código', value: 'codigo' },
@@ -707,6 +886,37 @@ export default {
     },
   },
   methods: {
+    async search() {
+      let token = Cookies.get('jwt-token')   
+      this.loading = true
+      switch (this.searchOptionSelected.id) {
+        case 1:
+          const configDateAttendance = {
+            headers: {
+              Authorization: 'Bearer '+ token
+              },
+              params: {
+                startDate: this.date + ' 00:00:00',
+                endDate: this.date2 + ' 23:59:59'
+              }
+            };
+            console.log(configDateAttendance)
+            await this.$axios
+              .get(`attendance/list/`, configDateAttendance)
+              .then(({ data }) => {
+                this.attendanceList = []
+                this.attendanceList = data.response   
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+            this.loading = false
+          break;
+
+        default:
+          break;
+      }
+    },
     generatePDF() {
       const columns = [
         { title: "Codigo", dataKey: "codigo" },
@@ -1283,6 +1493,8 @@ export default {
     },
     async updateTable() {
       try {
+        this.searchOptionSelected = []
+        this.loading = true
         this.attendanceList = []
         let token = Cookies.get('jwt-token')   
         const config = {

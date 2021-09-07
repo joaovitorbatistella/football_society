@@ -48,9 +48,9 @@ class Product
     public function getProductByParams($param)
     {
         if($param[0] == 'name'){
-            $sql = "SELECT * FROM " . self::TABLE ." WHERE nome LIKE '%".$param[1]."%' ORDER BY codigo desc";
+            $sql = "SELECT codigo AS cod_produto, nome, descricao, preco, estoque FROM " . self::TABLE ." WHERE nome LIKE '%".$param[1]."%' ORDER BY codigo desc";
         } else if($param[0] == 'id'){
-            $sql = "SELECT * FROM " . self::TABLE . " WHERE codigo = ". $param[1]. " ORDER BY codigo desc";
+            $sql = "SELECT codigo AS cod_produto, nome, descricao, preco, estoque FROM " . self::TABLE . " WHERE codigo = ". $param[1]. " ORDER BY codigo desc";
         }
         
         $stmt = $this->getConn()->getDb()->query($sql);
