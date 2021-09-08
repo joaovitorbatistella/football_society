@@ -47,6 +47,7 @@
                     class="mb-2"
                     v-bind="attrs"
                     v-on="on"
+                    @click="onStore"
                   >
                     CADASTRAR 
                   </v-btn>
@@ -179,30 +180,16 @@
                         }"
                         v-if="searchOptionSelected.id == 2"
                         color="lime accent-3"
-                        v-model="attendanceSelected"
-                        item-text="nome_cliente"
+                        v-model="statusSelected"
+                        item-text="value"
                         return-object
-                        item-value="codigo"
-                        :items="attendanceList"
-                        label="Selecione o atendimento"
+                        item-value="id"
+                        :items="statusList"
+                        label="Selecione o status"
                         dense
                         solo
                       >
-                        <template v-slot:item="{ on, item }">
-                          <v-list-item v-on="on" :nome_cliente="item.nome_cliente">{{ item.nome_cliente + ' -> ' + formattedJustDate(item.data_hora) }}</v-list-item>
-                        </template> 
                       </v-select>
-                      <v-text-field
-                        v-if="searchOptionSelected.id == 3"
-                        :style="{
-                          marginRight: '8px'
-                        }"
-                        label="Solo"
-                        placeholder="Placeholder"
-                        solo
-                        dense
-                      ></v-text-field>
-                      
                       <v-btn
                         class="mr-4"
                         @click="search"
@@ -518,7 +505,8 @@
                                 checkbox-color="#c6ff00"
                                 :headers="productsHeaders"
                                 :items="productsList"
-                                item-key="codigo"
+                                :items-per-page="5"
+                                item-key="cod_produto"
                                 show-select
                                 class="elevation-1"
                                 :single-select="false"
@@ -539,6 +527,7 @@
                               </v-icon>
                             </v-btn>
                             <v-btn
+                              v-if="productsHasBeenSelecteds"
                               color="green darken-1"
                               text
                               @click="confirmProducts"
@@ -571,7 +560,7 @@
                                 :items="customersList"
                                 hide-selected
                                 item-text="nome"
-                                item-value="codigo"
+                                item-value="cod_cliente"
                                 return-object
                                 label="Selecione um cliente "
                                 small-chips
@@ -725,6 +714,9 @@
             <span v-if="item.pago == 'Y'">PAGO</span>
             <span v-if="item.pago == 'N'">- - - - -</span>
           </template>
+          <template v-slot:item.valor_total="{ item }">
+            <span>R$ {{ item.valor_total }}</span>
+          </template>
           <template v-slot:item.data_hora="{ item }">
             <span>{{ formattedDate(item.data_hora) }}</span>
           </template>
@@ -786,6 +778,7 @@ export default {
     gameTime: null,
     gameTimeModal: false,
     productDateModal: false,
+    productsHasBeenSelecteds: false,
     productTime: null,
     productTimeModal: false,
     loaderMessage: 'Carregando',
@@ -798,13 +791,20 @@ export default {
     menu2: false,
     searchOptions: [
       { id: 1, value: 'Data' },
+      { id: 2, value: 'Status' },
     ],
+    statusList: [
+      {id: 1, value: 'Pago'},
+      {id: 2, value: 'Não pago'}
+    ],
+    statusSelected: [],
     searchOptionSelected: [],
     attendanceList: [],
     attendanceHeaders: [
       { text: 'Código', value: 'codigo' },
       { text: 'Descrição', value: 'descricao' },
       { text: 'Horário', value: 'data_hora' },
+      { text: 'Valor Total', value: 'valor_total' },
       { text: 'Status', value: 'pago' },
       { text: 'Cliente', value: 'nome_cliente' },
       { text: 'Actions', value: 'actions', sortable: false },
@@ -819,7 +819,7 @@ export default {
     },
     selected: [],
     productsHeaders: [
-      { text: 'Código', value: 'codigo' },
+      { text: 'Código', value: 'cod_produto' },
       { text: 'Nome', value: 'nome' },
       { text: 'Preço', value: 'preco' },
       { text: 'Estoque', value: 'estoque' },
@@ -903,6 +903,28 @@ export default {
             console.log(configDateAttendance)
             await this.$axios
               .get(`attendance/list/`, configDateAttendance)
+              .then(({ data }) => {
+                this.attendanceList = []
+                this.attendanceList = data.response   
+              })
+              .catch(err => {
+                console.log('error on GET: ', err)
+              })
+            this.loading = false
+          break;
+        
+        case 2:
+          const configStatusAttendance = {
+            headers: {
+              Authorization: 'Bearer '+ token
+              },
+              params: {
+                status: this.statusSelected.id
+              }
+            };
+            console.log(configStatusAttendance)
+            await this.$axios
+              .get(`attendance/list/`, configStatusAttendance)
               .then(({ data }) => {
                 this.attendanceList = []
                 this.attendanceList = data.response   
@@ -1060,7 +1082,7 @@ export default {
               dateTime: data.response[0].data_hora,
               payed: data.response[0].pago == 'Y' ? true : false,
               customer: {
-                codigo: data.response[0].cod_cliente,
+                cod_cliente: data.response[0].cod_cliente,
                 nome: data.response[0].nome
               }
             }
@@ -1118,7 +1140,7 @@ export default {
                  console.log("antes do for", data.response)
                 for(var i=0; i < data.response.length; i++) {
                   this.selected[i] = {
-                    codigo: data.response[i].cod_produto,
+                    cod_produto: data.response[i].cod_produto,
                     nome: data.response[i].nome,
                     preco:  data.response[i].valor_unitario,
                     quantity: data.response[i].quantidade,
@@ -1168,7 +1190,8 @@ export default {
         } else {
           alert('Informe a quantidade')
         }
-      } 
+      }
+      this.productsHasBeenSelecteds = true
       this.closeProducts()
     },
     async deleteItem (key) {
@@ -1191,14 +1214,17 @@ export default {
                   alert('Você tem um jogo agendado para '+this.formattedDate(data.response[o].data_hora)+' para este atendimento, delete-o primeiro!')
                   return;
                 }   
+              } else {
+                this.dialogDelete = true
+                this.toDelte = key
               }
             })
             .catch(err => {
               console.log('error on GET: ', err)
               this.loading = false
             })
-        this.dialogDelete = true
-        this.toDelte = key
+        
+        
         this.loading = false
     },
 
@@ -1225,7 +1251,9 @@ export default {
       this.productsDialog = false
     },
     close () {
+      this.buyComplete = false
       this.dialog = false
+      this.productsHasBeenSelecteds = false
       this.$nextTick(() => {
         this.editedItem[0] = {
           description: '',
@@ -1252,7 +1280,7 @@ export default {
         const attendanceData = {
           description: this.editedItem[0].description,
           payed: this.editedItem[0].payed == true ? 'Y' : 'N',
-          customerId: this.editedItem[0].customer.codigo
+          customerId: this.editedItem[0].customer.cod_cliente
         }
         this.loading = true
         await this.$axios
@@ -1297,11 +1325,11 @@ export default {
               .then(({data}) => {
 
 
-                let indx = data.response.findIndex(val => val.cod_produto == this.selected[i].codigo)
+                let indx = data.response.findIndex(val => val.cod_produto == this.selected[i].cod_produto)
                 if(indx < 0) {
                   const productAttndDataU = {
                     attendanceId: this.attendanceEditing,
-                    productId: this.selected[i].codigo,
+                    productId: this.selected[i].cod_produto,
                     quantity: this.selected[i].quantity,
                     fullPrice: this.selected[i].preco * this.selected[i].quantity,
                     unityPrice: this.selected[i].preco
@@ -1320,7 +1348,7 @@ export default {
                     })
                 }
                 for(var m=0; m < data.response.length; m++){
-                  let indxDelete = this.selected.findIndex(val => val.codigo == data.response[m].cod_produto)
+                  let indxDelete = this.selected.findIndex(val => val.cod_produto == data.response[m].cod_produto)
                   if (indxDelete < 0){
                     const cfgA = {
                       headers: {
@@ -1346,7 +1374,7 @@ export default {
 
           const productAttndData = {
             attendanceId: this.attendanceEditing,
-            productId: this.selected[i].codigo,
+            productId: this.selected[i].cod_produto,
             quantity: parseInt(this.selected[i].quantity),
             fullPrice: parseFloat(this.selected[i].preco) * parseInt(this.selected[i].quantity),
             unityPrice: parseFloat(this.selected[i].preco)
@@ -1364,7 +1392,7 @@ export default {
               console.log('error on GET: ', err)
             })
           await this.$axios
-            .get(`product/list/${this.selected[i].codigo}`, {headers})
+            .get(`product/list/${this.selected[i].cod_produto}`, {headers})
             .then(pd => {
               console.log("PD",pd)
               this.productData = {
@@ -1381,7 +1409,7 @@ export default {
             })
             console.log("this.productData", this.productData)
           await this.$axios
-            .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+            .put(`product/update/${this.selected[i].cod_produto}`, this.productData, {headers})
             .then()
             .catch(err => {
               console.log('error on GET: ', err)
@@ -1404,7 +1432,7 @@ export default {
         const attendanceData = {
             description: this.editedItem[0].description,
             payed: this.editedItem[0].payed == true ? 'Y' : 'N',
-            customerId: this.editedItem[0].customer.codigo
+            customerId: this.editedItem[0].customer.cod_cliente
           }
         this.loading = true
         await this.$axios
@@ -1440,7 +1468,7 @@ export default {
             console.log("for")
             const productAttndData = {
               attendanceId: this.insertedAttendanceId,
-              productId: this.selected[i].codigo,
+              productId: this.selected[i].cod_produto,
               quantity: this.selected[i].quantity,
               fullPrice: this.selected[i].preco * this.selected[i].quantity,
               unityPrice: this.selected[i].preco
@@ -1460,7 +1488,7 @@ export default {
               console.log('error on GET: ', err)
             })
           await this.$axios
-            .get(`product/list/${this.selected[i].codigo}`, {headers})
+            .get(`product/list/${this.selected[i].cod_produto}`, {headers})
             .then(pd => {
               console.log("PD",pd)
               this.productData = {
@@ -1476,7 +1504,7 @@ export default {
               this.loading = false
             })
           await this.$axios
-            .put(`product/update/${this.selected[i].codigo}`, this.productData, {headers})
+            .put(`product/update/${this.selected[i].cod_produto}`, this.productData, {headers})
             .then()
             .catch(err => {
               console.log('error on GET: ', err)

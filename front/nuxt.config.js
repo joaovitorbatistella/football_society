@@ -16,8 +16,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - front',
-    title: 'front',
+    titleTemplate: '%s - Orange Group',
+    title: 'SGBD',
     htmlAttrs: {
       lang: 'en'
     },

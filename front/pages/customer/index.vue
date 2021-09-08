@@ -169,11 +169,47 @@
                           sm="6"
                           md="6"
                         >
-                          <v-text-field
-                             color= "lime accent-3"
-                             v-model="editedItem[0].dt_nascimento"
-                            label="Data de nascimento (YYYY-MM-DD)"
-                          ></v-text-field>
+                          <v-dialog
+                            ref="customerDateDialog"
+                            v-model="customerDateModal"
+                            color= "lime accent-3"
+                            :return-value.sync="editedItem[0].dt_nascimento"
+                            persistent
+                            width="290px"
+                          >
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-text-field
+                                v-model="editedItem[0].dt_nascimento"
+                                color= "lime accent-3"
+                                label="Data de nascimento"
+                                prepend-icon="mdi-calendar"
+                                readonly
+                                v-bind="attrs"
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="editedItem[0].dt_nascimento"
+                              color= "lime accent-3"
+                              scrollable
+                            >
+                              <v-spacer></v-spacer>
+                              <v-btn
+                                text
+                                color="primary"
+                                @click="customerDateModal = false"
+                              >
+                                Cancel
+                              </v-btn>
+                              <v-btn
+                                text
+                                color="primary"
+                                @click="$refs.customerDateDialog.save(editedItem[0].dt_nascimento)"
+                              >
+                                OK
+                              </v-btn>
+                            </v-date-picker>
+                          </v-dialog>
                         </v-col>
                         <v-col
                           cols="12"
@@ -213,7 +249,7 @@
                           sm="6"
                           md="6"
                         >
-                          <v-combobox
+                          <v-select
                             v-model="editedItem[0].sexo"
                             :items="sexList"
                             hide-selected
@@ -244,7 +280,7 @@
                           sm="6"
                           md="6"
                         >
-                          <v-combobox
+                          <v-select
                             color= "lime accent-3"
                             v-model="editedItem[0].cidade"
                             :items="cityList"
@@ -252,7 +288,7 @@
                             item-text="nome"
                             item-value="codigo"
                             return-object
-                            label="Selecione um cliente "
+                            label="Selecione uma cidade "
                             small-chips
                             dense
                             dark
@@ -347,6 +383,7 @@ export default {
       { id: 4, value: 'E-mail' },
     ],
     searchOptionSelected: [],
+    customerDateModal: '',
     dialog: false,
     dialogDelete: false,
     heading: 'Relatorio de Clientes',
@@ -504,7 +541,7 @@ export default {
     },
     generatePDF() {
       const columns = [
-        { title: "Codigo", dataKey: "codigo" },
+        { title: "Codigo", dataKey: "cod_cliente" },
         { title: "Data de Nascimento", dataKey: "dt_nascimento" },
         { title: "Telefone", dataKey: "telefone" },
         { title: "Email", dataKey: "email" },
@@ -692,7 +729,7 @@ export default {
           telephone: this.editedItem[0].telefone,
           email: this.editedItem[0].email,
           address: this.editedItem[0].logradouro,
-          sex: this.editedItem[0].sexo,
+          sex: this.editedItem[0].sexo.sex,
           cpf: this.editedItem[0].cpf,
           cityId: this.editedItem[0].cidade.codigo,
         }
@@ -717,7 +754,7 @@ export default {
             telephone: this.editedItem[0].telefone,
             email: this.editedItem[0].email,
             address: this.editedItem[0].logradouro,
-            sex: this.editedItem[0].sexo,
+            sex: this.editedItem[0].sexo.sex,
             cpf: this.editedItem[0].cpf,
             cityId: this.editedItem[0].cidade.codigo,
           }

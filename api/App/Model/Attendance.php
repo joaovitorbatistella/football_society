@@ -28,7 +28,7 @@ class Attendance
     public function getAllAttendances($table)
     {
         if ($table) {
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente FROM atendimento a INNER JOIN cliente cl ON a.cod_cliente = cl.codigo ORDER BY a.codigo desc";
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_total FROM atendimento a INNER JOIN cliente cl ON a.cod_cliente = cl.codigo INNER JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento group by a.codigo, cl.nome ORDER BY a.codigo desc;";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -50,10 +50,13 @@ class Attendance
     {
         if($param[0] == 'id'){
             $id = (int)$param[1];
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.cod_cliente, c.nome, a.pago, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente c ON c.codigo = a.cod_cliente WHERE a.codigo = ". $id." ORDER BY a.codigo desc" ;
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_total FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente cl ON cl.codigo = a.cod_cliente INNER JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento WHERE a.codigo = ". $id." group by a.codigo, cl.nome ORDER BY a.codigo desc" ;
+        } else if($param[0] == 'status'){
+            $param[1] = (int)$param[1] == 1 ? 'Y' : 'N';
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_total FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente cl ON cl.codigo = a.cod_cliente INNER JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento WHERE a.pago = '".$param[1]."' group by a.codigo, cl.nome ORDER BY a.codigo desc";
         }
-        else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.cod_cliente, c.nome, a.pago, j.data_hora as horario_jogo FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente c ON c.codigo = a.cod_cliente WHERE a.data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."' ORDER BY a.codigo desc";
+        else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){           
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_total FROM atendimento a LEFT JOIN jogo j  on a.codigo = j.cod_atendimento LEFT JOIN cliente cl ON cl.codigo = a.cod_cliente INNER JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento WHERE a.data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."' group by a.codigo, cl.nome ORDER BY a.codigo desc";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
 

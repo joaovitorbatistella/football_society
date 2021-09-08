@@ -263,18 +263,102 @@
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
+                          md="6"
                         >
-                          <v-text-field
-                             color= "lime accent-3"
-                             v-model="editedItem[0].data_hora"
-                            label="Data e Hora"
-                          ></v-text-field>
+                          <v-dialog
+                            ref="gameDateDialog"
+                            v-model="gameDateModal"
+                            color= "lime accent-3"
+                            :return-value.sync="editedItem[0].date"
+                            persistent
+                            width="290px"
+                          >
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-text-field
+                                v-model="editedItem[0].date"
+                                color= "lime accent-3"
+                                label="Selecione uma data"
+                                prepend-icon="mdi-calendar"
+                                readonly
+                                v-bind="attrs"
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="editedItem[0].date"
+                              color= "lime accent-3"
+                              scrollable
+                            >
+                              <v-spacer></v-spacer>
+                              <v-btn
+                                text
+                                color="primary"
+                                @click="gameDateModal = false"
+                              >
+                                Cancel
+                              </v-btn>
+                              <v-btn
+                                text
+                                color="primary"
+                                @click="$refs.gameDateDialog.save(editedItem[0].date); gameTimeModal = true"
+                              >
+                                OK
+                              </v-btn>
+                            </v-date-picker>
+                          </v-dialog>
                         </v-col>
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
+                          md="6"
+                        >
+                          <v-dialog
+                            ref="gameTimeDialog"
+                            v-model="gameTimeModal"
+                            color= "lime accent-3"
+                            :return-value.sync="editedItem[0].hour"
+                            persistent
+                            width="290px"
+                          >
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-text-field
+                                v-model="editedItem[0].hour"
+                                color= "lime accent-3"
+                                label="Selecione um horário"
+                                prepend-icon="mdi-clock-time-four-outline"
+                                readonly
+                                v-bind="attrs"
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-time-picker
+                              v-if="gameTimeModal"
+                              v-model="editedItem[0].hour"
+                              color= "lime accent-3"
+                              full-width
+                            >
+                              <v-spacer></v-spacer>
+                              <v-btn
+                                text
+                                color="primary"
+                                @click="gameTimeModal = false"
+                              >
+                                Cancel
+                              </v-btn>
+                              <v-btn
+                                text
+                                color="primary"
+                                @click="$refs.gameTimeDialog.save(editedItem[0].hour)"
+                              >
+                                OK
+                              </v-btn>
+                            </v-time-picker>
+                          </v-dialog>
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="6"
                         >
                           <v-text-field
                              color= "lime accent-3"
@@ -285,7 +369,7 @@
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
+                          md="6"
                         >
                           <v-text-field
                              color= "lime accent-3"
@@ -296,7 +380,7 @@
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
+                          md="6"
                         >
                           <v-text-field
                              color= "lime accent-3"
@@ -307,13 +391,19 @@
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
+                          md="6"
                         >
-                          <v-text-field
-                             color= "lime accent-3"
-                             v-model="editedItem[0].cod_atendimento"
-                            label="Atendimento"
-                          ></v-text-field>
+                          <v-select
+                            color="lime accent-3"
+                            v-model="editedItem[0].atendimento"
+                            :items="attendanceList"
+                            placeholder="Selecione o atendimento"
+                            return-object
+                            item-text="nome_cliente"
+                            item-value="codigo"
+                            dense
+                            solo
+                          ></v-select>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -408,6 +498,8 @@ export default {
       { id: 2, value: 'Atendimento' },
     ],
     searchOptionSelected: [],
+    gameTimeModal: false,
+    gameDateModal: false,
     dialog: false,
     dialogDelete: false,
     attendanceSelected: [],
@@ -423,11 +515,12 @@ export default {
     editedIndex: -1,
     editedItem: [
       {
-        data_hora: '',
+        date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+        hour: null,
         valor: '',
         descricao: '',
         desconto: '',
-        cod_atendimento: ''
+        atendimento: null
       }
     ],
     lastGamesList: [
@@ -591,13 +684,19 @@ export default {
         this.$axios
           .get(`game/list/`, config)
           .then(({ data }) => {
+            let dateTime = data.response[0].data_hora.split(' ')
             this.editedItem[0] = {
-              data_hora: data.response[0].data_hora,
-              old_data_hora: data.response[0].data_hora,
+              date: dateTime[0],
+              oldDate: dateTime[0],
+              hour: dateTime[1],
+              oldHour: dateTime[1],
               valor: data.response[0].valor,
               descricao: data.response[0].descricao,
               desconto: data.response[0].desconto,
-              cod_atendimento: data.response[0].cod_atendimento
+              atendimento: { 
+                codigo: data.response[0].cod_atendimento,
+                nome_cliente: data.response[0].nome_cliente 
+              }
             }
             this.dialog = true
             this.loading = false
@@ -644,10 +743,11 @@ export default {
       this.dialog = false
       this.$nextTick(() => {
         this.editedItem[0] = {
-          data_hora: '',
+          date: '',
+          hour: '',
           valor: '',
           descricao: '',
-          cod_atendimento: ''
+          atendimento: null
         } 
         this.editedIndex = -1
       })
@@ -658,18 +758,19 @@ export default {
     },
 
     save () {
+      console.log(this.editedIndex)
       if (this.editedIndex > -1) {
         let token = Cookies.get('jwt-token')   
         let headers= {
               'Authorization': 'Bearer '+ token
               }
         const data = {
-            oldDateAndTime: this.editedItem[0].old_data_hora,
-            newDateAndTime: this.editedItem[0].data_hora,
+            newDateAndTime: this.editedItem[0].date + ' ' + this.editedItem[0].hour+':00',
+            oldDateAndTime: this.editedItem[0].oldDate + ' ' + this.editedItem[0].oldHour,
             price: this.editedItem[0].valor,
             description: this.editedItem[0].descricao,
             discount: this.editedItem[0].desconto,
-            attendanceId: this.editedItem[0].cod_atendimento
+            attendanceId: this.editedItem[0].atendimento.codigo
           }
         this.loading = true
         this.$axios
@@ -682,16 +783,17 @@ export default {
             console.log('error on GET: ', err)
           })
       } else {
+        console.log(this.editedIndex, "ELSE")
          let token = Cookies.get('jwt-token')   
           let headers= {
                 'Authorization': 'Bearer '+ token
                 }
           const data = {
-              dateAndTime: this.editedItem[0].data_hora,
+              dateAndTime: this.editedItem[0].date + ' ' + this.editedItem[0].hour+':00',
               price: this.editedItem[0].valor,
               description: this.editedItem[0].descricao,
               discount: this.editedItem[0].desconto == '' ? 0.00 :  this.editedItem[0].desconto,
-              attendanceId: this.editedItem[0].cod_atendimento
+              attendanceId: this.editedItem[0].atendimento.codigo
             }
           console.log(data)
           this.loading = true
@@ -727,7 +829,7 @@ export default {
               valor: '',
               descricao: '',
               desconto: '',
-              cod_atendimento: ''
+              atendimento: null
             }
           })
           .catch(err => {

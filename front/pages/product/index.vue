@@ -292,7 +292,6 @@ export default {
   }),
   async beforeMount() {
     try {
-      this.loading = true
       this.updateTable()
     } catch(e) {
       console.log("erro: ", e)
@@ -428,6 +427,7 @@ export default {
     },
     async editItem (key) {
       try {
+        this.loading = true
         this.editingProduct = key
         this.editedIndex = 1
         let token = Cookies.get('jwt-token')   
@@ -440,7 +440,6 @@ export default {
             }
         }
         
-        this.loading = true
         await this.$axios
           .get(`product/list`, configCustomer)
           .then(({ data }) => {
@@ -517,8 +516,8 @@ export default {
     },
 
     save () {
-        this.loading = true
       if (this.editedIndex > -1) {
+        this.loading = true
         let token = Cookies.get('jwt-token')   
         let headers= {
               'Authorization': 'Bearer '+ token
@@ -539,8 +538,9 @@ export default {
             console.log('error on GET: ', err)
           })
       } else {
-         let token = Cookies.get('jwt-token')   
-          let headers= {
+        this.loading = true
+        let token = Cookies.get('jwt-token')   
+        let headers= {
                 'Authorization': 'Bearer '+ token
                 }
           const data = {
@@ -561,7 +561,6 @@ export default {
             })
       }
       this.updateTable()
-      this.close()
     },
     async updateTable() {
         this.searchOptionSelected = []

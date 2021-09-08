@@ -28,7 +28,7 @@ class Game
     public function getAllGames($table)
     {
         if ($table) {
-            $sql = "SELECT j.data_hora, j.valor, j.descricao, j.desconto, a.descricao AS descricao_atendimento, cl.nome AS nome_cliente FROM jogo j INNER JOIN atendimento a ON j.cod_atendimento = a.codigo INNER JOIN cliente cl ON a.cod_cliente = cl.codigo";
+            $sql = "SELECT j.data_hora, j.valor, j.descricao, j.desconto, j.cod_atendimento, a.descricao AS descricao_atendimento, cl.nome AS nome_cliente FROM jogo j INNER JOIN atendimento a ON j.cod_atendimento = a.codigo INNER JOIN cliente cl ON a.cod_cliente = cl.codigo";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
                 $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -57,7 +57,7 @@ class Game
         } else if($param[0] == 'attendanceId'){
             $sql = "SELECT * FROM " . self::TABLE . " WHERE cod_atendimento = '".$param[1]."'";
         } else if($param[0] == 'last'){
-            $sql = "SELECT j.data_hora, j.valor, j.descricao, j.desconto, a.descricao AS descricao_atendimento, cl.nome AS nome_cliente FROM jogo j INNER JOIN atendimento a ON j.cod_atendimento = a.codigo INNER JOIN cliente cl ON a.cod_cliente = cl.codigo WHERE j.data_hora > '".$dateNow."' ORDER BY j.data_hora LIMIT 1";
+            $sql = "SELECT j.data_hora, j.valor, j.descricao, j.desconto, j.cod_atendimento, a.descricao AS descricao_atendimento, cl.nome AS nome_cliente FROM jogo j INNER JOIN atendimento a ON j.cod_atendimento = a.codigo INNER JOIN cliente cl ON a.cod_cliente = cl.codigo WHERE j.data_hora > '".$dateNow."' ORDER BY j.data_hora LIMIT 1";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
 

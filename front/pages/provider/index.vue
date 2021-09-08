@@ -181,7 +181,7 @@
                           sm="6"
                           md="6"
                         >
-                          <v-combobox
+                          <v-select
                              color= "lime accent-3"
                              v-model="editedItem[0].cidade"
                             :items="cityList"
@@ -318,7 +318,7 @@ export default {
   },
  computed: {
     formTitle () {
-      return this.editedIndex === -1 ? 'Novo Cliente' : 'Editar Cliente'
+      return this.editedIndex === -1 ? 'Novo Fornecedor' : 'Editar Fornecedor'
     },
   },
 
@@ -611,15 +611,12 @@ export default {
           this.loading = true
           this.$axios
             .post(`provider/store/`, data, {headers})
-            .then(({ data }) => {
-              console.log(data)
-              this.updateTable()
-            })
+            .then()
             .catch(err => {
               console.log('error on GET: ', err)
             })
       }
-      this.close()
+      this.updateTable()
     },
     async updateTable() {
       try {
