@@ -714,8 +714,13 @@
             <span v-if="item.pago == 'Y'">PAGO</span>
             <span v-if="item.pago == 'N'">- - - - -</span>
           </template>
-          <template v-slot:item.valor_total="{ item }">
-            <span>R$ {{ item.valor_total }}</span>
+          <template v-slot:item.valor_jogos="{ item }">
+            <span v-if="item.valor_jogos">R$ {{ item.valor_jogos }}</span>
+            <span v-else>- - - - -</span>
+          </template>
+          <template v-slot:item.valor_produtos="{ item }">
+            <span v-if="item.valor_produtos">R$ {{ item.valor_produtos }}</span>
+            <span v-else>- - - - -</span>
           </template>
           <template v-slot:item.data_hora="{ item }">
             <span>{{ formattedDate(item.data_hora) }}</span>
@@ -804,7 +809,8 @@ export default {
       { text: 'Código', value: 'codigo' },
       { text: 'Descrição', value: 'descricao' },
       { text: 'Horário', value: 'data_hora' },
-      { text: 'Valor Total', value: 'valor_total' },
+      { text: 'Valor Total Jogos', value: 'valor_jogos' },
+      { text: 'Valor Total Produtos', value: 'valor_produtos' },
       { text: 'Status', value: 'pago' },
       { text: 'Cliente', value: 'nome_cliente' },
       { text: 'Actions', value: 'actions', sortable: false },
@@ -944,6 +950,8 @@ export default {
         { title: "Codigo", dataKey: "codigo" },
         { title: "Descricao", dataKey: "descricao" },
         { title: "Data e Hora", dataKey: "data_hora" },
+        { title: "Valor Total Jogos", dataKey: "valor_jogos" },
+        { title: "Valor Total Produtos", dataKey: "valor_produtos" },
         { title: "Status", dataKey: "pago" },
         { title: "Cliente", dataKey: "nome_cliente" },
       ];
