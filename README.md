@@ -17,6 +17,47 @@ ___
 
 ___
 
+## Requisitos para instalar
+
+* PHP 7.4
+* Postgres
+* NPM - Gerenciador de pacote
+
+___
+
+## Passo a passo
+
+* Clone o repositório;
+* Na pasta 'api/', devemos renomear o arquivo 'env_example.php' para 'env.php' e completar com os dados do seu BD e seu SECRET, este para a criptografia JWT;
+* Acesse seu terminal ou PowerShell e siga as instruções abaixo
+
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+* Este último comando irá iniciar o servidor do Nuxt.js localmente, usando a porta 3000
+* Acesse usando: http://127.0.0.1:3000
+
+
+* Por fim você deve executar o 'script.sql' contido na pasta 'api/', em seu banco Postgres
+* Nesta versão, somente é possível fazer a inserção de novos usuários via BD. Por comodidade, o usuário 'joaovb' na qual senha é 'Adm987321', já está disponível para uso.
+
+### Bom proveito e bons estudos!!! 
+
+___
+
+
+#### Para a próxima versão
+
+* Criptografia de senha
+* Trigger para expirar tokens após 1 dia
+* CRUD para a tabela compra_produto
+___
+
 ## To-Do: Rest API
 
 #### Usuários
