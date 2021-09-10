@@ -26,10 +26,10 @@
             class="mr-4"
             @click="submit"
           >
-            submit
+            Entrar
           </v-btn>
           <v-btn @click="clear">
-            clear
+            Limpar
           </v-btn>
         </form>
       </v-row >

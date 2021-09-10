@@ -4,7 +4,7 @@ ___
 
 ___
 
-##### by: João Vítor Batistella, Henrique, Alex e José Gomes
+##### by: Alex Jean Lemes, Henrique Comin, João Vítor Batistella e José Gomes
 
 ___
 

@@ -509,6 +509,7 @@ export default {
     gamesHeaders: [
       { text: 'Horário', value: 'data_hora' },
       { text: 'Valor', value: 'valor' },
+      { text: 'Desconto', value: 'desconto' },
       { text: 'Atend. Cliente', value: 'nome_cliente' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
