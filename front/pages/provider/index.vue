@@ -295,7 +295,7 @@ export default {
       { text: 'Endereço', value: 'logradouro' },
       { text: 'Cidade', value: 'nome_cidade' },
       { text: 'UF', value: 'uf' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: 'Ações', value: 'actions', sortable: false },
     ],
     editedIndex: -1,
     editedItem: [

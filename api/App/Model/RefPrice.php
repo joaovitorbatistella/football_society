@@ -41,9 +41,6 @@ class RefPrice
 
     /**
      * @param $id
-     * @param $price
-     * @param $start
-     * @param $end
      * @param $data
      * @return int
      */

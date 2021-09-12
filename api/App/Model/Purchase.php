@@ -39,8 +39,6 @@ class Purchase
 
     /**
      * @param $id
-     * @param $quantity
-     * @param $providerId
      * @param $data
      * @return int
      */

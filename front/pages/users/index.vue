@@ -174,7 +174,7 @@ export default {
       { text: 'Código', value: 'codigo' },
       { text: 'Nome', value: 'nome' },
       { text: 'Nome de Usuário', value: 'nome_de_usuario' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: 'Ações', value: 'actions', sortable: false },
     ],
     editedIndex: -1,
     editedItem: [

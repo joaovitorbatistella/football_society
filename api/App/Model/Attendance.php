@@ -28,7 +28,7 @@ class Attendance
     public function getAllAttendances($table)
     {
         if ($table) {
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
@@ -36,7 +36,7 @@ class Attendance
             LEFT JOIN jogo j  on a.codigo = j.cod_atendimento 
             INNER JOIN cliente cl ON a.cod_cliente = cl.codigo 
             LEFT JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento 
-            group by a.codigo, cl.codigo
+            group by a.codigo, cl.codigo, j.data_hora
             ORDER BY a.codigo desc";
             $stmt = $this->getConn()->getDb()->query($sql);
             if($stmt) {
@@ -59,7 +59,7 @@ class Attendance
     {
         if($param[0] == 'id'){
             $id = (int)$param[1];
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
@@ -68,11 +68,11 @@ class Attendance
             INNER JOIN cliente cl ON a.cod_cliente = cl.codigo 
             LEFT JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento
             WHERE a.codigo = ". $id."
-            group by a.codigo, cl.codigo
+            group by a.codigo, cl.codigo, j.data_hora
             ORDER BY a.codigo desc";
         } else if($param[0] == 'status'){
             $param[1] = (int)$param[1] == 1 ? 'Y' : 'N';
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
@@ -81,11 +81,11 @@ class Attendance
             INNER JOIN cliente cl ON a.cod_cliente = cl.codigo 
             LEFT JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento
             WHERE a.pago = '".$param[1]."'
-            group by a.codigo, cl.codigo
+            group by a.codigo, cl.codigo, j.data_hora
             ORDER BY a.codigo desc";
         }
         else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){           
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, cl.nome AS nome_cliente, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
@@ -94,7 +94,7 @@ class Attendance
             INNER JOIN cliente cl ON a.cod_cliente = cl.codigo 
             LEFT JOIN produto_atendimento pa ON a.codigo = pa.cod_atendimento
             WHERE a.data_hora BETWEEN '".$param[0][1]."' AND '".$param[1][1]."'
-            group by a.codigo, cl.codigo
+            group by a.codigo, cl.codigo, j.data_hora
             ORDER BY a.codigo desc";
         } 
         $stmt = $this->getConn()->getDb()->query($sql);
@@ -130,10 +130,6 @@ class Attendance
 
     /**
      * @param $id
-     * @param $description
-     * @param $dateAndTime
-     * @param $payed
-     * @param $customerId
      * @param $data
      * @return int
      */

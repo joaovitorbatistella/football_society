@@ -65,11 +65,6 @@ class ProductAttendance
     
 
     /**
-     * @param $attendanceId
-     * @param $productId
-     * @param $quantity
-     * @param $fullValue
-     * @param $unityValue
      * @param $data
      * @return int
      */

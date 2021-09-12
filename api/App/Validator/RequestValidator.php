@@ -237,6 +237,11 @@ class RequestValidator
                     $handleProductAttendance->setBodyDataRequests($this->requestData);
                     $return = $handleProductAttendance->validatePut();
                     break;
+                case self::REF:
+                    $handleRef = new handleRef($this->request);
+                    $handleRef->setBodyDataRequests($this->requestData);
+                    $return = $handleRef->validatePut();
+                    break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
             }

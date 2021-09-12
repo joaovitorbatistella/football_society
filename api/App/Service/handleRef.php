@@ -11,6 +11,7 @@ class handleRef
 {
     public const TABLE = 'valor_ref';
     public const GET_RESOURCES = ['list'];
+    public const PUT_RESOURCES = ['update'];
 
     private array $data;
     private array $bodyDataRequests;
@@ -54,6 +55,39 @@ class handleRef
 
         return $return;
     }
+
+        /**
+     * @return mixed
+     */
+    public function validatePut()
+    {
+        $return = null;
+        $resource = $this->data['resource'];
+        if (in_array($resource, self::PUT_RESOURCES, true)) {
+            if ($this->data['id'] > 0) {
+                $return = $this->$resource();
+            } else {
+                throw new InvalidArgumentException(GenericConsts::MSG_ERRO_ID_OBRIGATORIO);
+            }
+        } else {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
+        }
+
+        if ($return === null) {
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param array $bodyDataRequests
+     */
+    public function setBodyDataRequests($bodyDataRequests)
+    {
+        $this->bodyDataRequests = $bodyDataRequests;
+
+    }
     
     /**
      * @return mixed
@@ -63,33 +97,38 @@ class handleRef
         return $this->Ref->getAllRefs(self::TABLE);
     }
 
-    private function store()
+    
+     /**
+     * @param $data
+     * @return mixed
+     */
+    private function filterByParams($data)
     {
-        [
-            $dateAndTime,
-            $price,
-            $description,
-            $discount,
-            $attendanceId
-        ] = [
-            $this->bodyDataRequests['dateAndTime'],
-            $this->bodyDataRequests['price'],
-            $this->bodyDataRequests['description'],
-            $this->bodyDataRequests['discount'],
-            $this->bodyDataRequests['attendanceId'],
-        ];
-
-        if ($dateAndTime && $price && $description && $attendanceId) {
-            if ($this->Ref->insertRef($dateAndTime, $price, $description, $discount, $attendanceId) > 0) {
-                $this->Ref->getConn()->getDb()->commit();
-                return 'Ref has been inserted.';
-            }
-
-            $this->Ref->getConn()->getDb()->rollBack();
-
-            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_GENERICO);
+        $var = explode('&', $data);
+        $params=[];
+        for($i=0; $i < count($var); $i++) {
+            $params[$i] = $var[$i];
         }
-        throw new InvalidArgumentException(GenericConsts::MSG_ERROR_EMPTY_FIELDS);
+        for($i=0; $i < count($params); $i++) {
+            $params[$i] = str_replace('%20', ' ', $params[$i]);
+            $params[$i] = str_replace('%40', '@', $params[$i]);
+            $params[$i] = str_replace('+', ' ', $params[$i]);
+        }
+        $param= explode('=', $params[0]);
+        return $this->Ref->getRefsByParams($param);
+    }
+
+    /**
+     * @return string
+     */
+    private function update()
+    {
+        if ($this->Ref->updateRef($this->data['id'], $this->bodyDataRequests) > 0) {
+            $this->Ref->getConn()->getDb()->commit();
+            return GenericConsts::MSG_ATUALIZADO_SUCESSO;
+        }
+        $this->Ref->getConn()->getDb()->rollBack();
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_NAO_AFETADO);
     }
 
 }

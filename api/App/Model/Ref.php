@@ -44,6 +44,42 @@ class Ref
     }
 
     /**
+     * @param $param
+     * @return int
+     */
+    public function getRefsByParams($param)
+    {
+        if($param[0] == 'id'){
+            $sql = "SELECT * FROM " . self::TABLE ." WHERE codigo = ".$param[1];
+        } 
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
+    }
+
+    /**
+     * @param $id
+     * @param $data
+     * @return int
+     */
+    public function updateRef($id, $data)
+    {
+        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET valor = :price, inicio = :start, fim = :end WHERE codigo = :id';
+        $this->Conn->getDb()->beginTransaction();
+        $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindValue(':price', $data['price']);
+        $stmt->bindValue(':start', $data['start']);
+        $stmt->bindValue(':end', $data['end']);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    /**
      * @return Conn|object
      */
     public function getConn()

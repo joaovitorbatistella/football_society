@@ -527,6 +527,19 @@
                               </v-icon>
                             </v-btn>
                             <v-btn
+                              v-if="selected.length > 0"
+                              color="lime accent-3"
+                              text
+                              @click="setEmptyCart"
+                            >
+                              <v-icon
+                                medium
+                                color="orange darken-2"
+                              >
+                                mdi-cart-remove
+                              </v-icon>
+                            </v-btn>
+                            <v-btn
                               v-if="productsHasBeenSelecteds"
                               color="green darken-1"
                               text
@@ -813,7 +826,7 @@ export default {
       { text: 'Valor Total Produtos', value: 'valor_produtos' },
       { text: 'Status', value: 'pago' },
       { text: 'Cliente', value: 'nome_cliente' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: 'Ações', value: 'actions', sortable: false },
     ],
     customersList: [],
     productsList: [],
@@ -847,6 +860,7 @@ export default {
         discount: null,
       }
     ],
+    cnfgPUinventory: null
   }),
   async beforeMount() {
     try {
@@ -1047,6 +1061,9 @@ export default {
         alert('Selecione algum produto')
       }
     },
+    setEmptyCart() {
+      this.selected = []
+    },
     confirmProducts() {
       this.buyComplete = true
     },
@@ -1091,10 +1108,9 @@ export default {
               payed: data.response[0].pago == 'Y' ? true : false,
               customer: {
                 cod_cliente: data.response[0].cod_cliente,
-                nome: data.response[0].nome
+                nome: data.response[0].nome_cliente
               }
             }
-            console.log(this.editedItem[0])
             this.gameHour = data.response[0].horario_jogo
           })
           .catch(err => {
@@ -1260,6 +1276,7 @@ export default {
     },
     close () {
       this.buyComplete = false
+      this.cnfgPUinventory = null
       this.dialog = false
       this.productsHasBeenSelecteds = false
       this.$nextTick(() => {
@@ -1290,6 +1307,7 @@ export default {
           payed: this.editedItem[0].payed == true ? 'Y' : 'N',
           customerId: this.editedItem[0].customer.cod_cliente
         }
+        console.log("attendanceData", attendanceData)
         this.loading = true
         await this.$axios
           .put(`attendance/update/${this.attendanceEditing}`, attendanceData, {headers})
@@ -1331,8 +1349,10 @@ export default {
               await this.$axios
               .get(`productattendance/list`, cfgP)
               .then(({data}) => {
-
-
+                console.log(data)
+                if(data.type == 'error'){
+                  return;
+                }
                 let indx = data.response.findIndex(val => val.cod_produto == this.selected[i].cod_produto)
                 if(indx < 0) {
                   const productAttndDataU = {
@@ -1356,6 +1376,8 @@ export default {
                     })
                 }
                 for(var m=0; m < data.response.length; m++){
+                  console.log("erro2103",this.selected)
+
                   let indxDelete = this.selected.findIndex(val => val.cod_produto == data.response[m].cod_produto)
                   if (indxDelete < 0){
                     const cfgA = {
@@ -1370,12 +1392,44 @@ export default {
                     console.log(cfgA)
                     this.$axios
                       .delete(`productattendance/delete`, cfgA)
-                      .then(({data}) => {
-                        console.log("delete pa", data)
-                      })
+                      .then()
                       .catch(err => {
                         console.log('error on GET: ', err)
                       })
+
+                    const cnfgPL = {
+                      params: {
+                        id: data.response[m].cod_produto
+                      },
+                      headers: {
+                        Authorization: 'Bearer '+ token
+                      }
+                    }
+                    console.log('m', m)
+                    console.log('cnfgP', cnfgPL)
+                    this.$axios
+                      .get(`product/list`, cnfgPL)
+                      .then(pl => {
+                        console.log('m', m)
+                        this.cnfgPUinventory = pl.data.response[0].estoque + data.response[m-1].quantidade
+                        console.log('this.cnfgPU', this.cnfgPUinventory)
+                        const cnfgPU = {
+                          inventory: this.cnfgPUinventory
+                        }
+
+                        console.log('cnfgPU', cnfgPU)
+                        console.log('m', m)
+                        this.$axios
+                          .put(`product/update/${data.response[m-1].cod_produto}`, cnfgPU, {headers})
+                          .then()
+                          .catch(err => {
+                            console.log('error on GET: ', err)
+                          })
+                      })
+                      .catch(err => {
+                        console.log('error on GET: ', err)
+                      })     
+                    
                   }
                 }
               })
@@ -1391,9 +1445,13 @@ export default {
           await this.$axios
             .put(`productattendance/update`, productAttndData, {headers})
             .then(pad => {
-              console.log("PAD", pad)
-              if(pad.data.type == 'success') {
-                console.log("-> prox. list/id", this.selected[i])
+              if (pad.data.type == 'error') {
+                this.$axios
+                  .post(`productattendance/store`, productAttndData, {headers})
+                  .then()
+                  .catch(err => {
+                    console.log('error on GET: ', err)
+                  })
               }
             })
             .catch(err => {
@@ -1424,6 +1482,78 @@ export default {
               this.loading = false
             })
           }     
+        } else {
+          const cfgP = {
+          headers: {
+            Authorization: 'Bearer '+ token
+            },
+            params: {
+              attendanceId: this.attendanceEditing,
+            }
+          }
+          await this.$axios
+            .get(`productattendance/list`, cfgP)
+            .then(({data}) => {
+              console.log(data)
+              if(data.type == 'error'){
+                return;
+              }
+              for(var n=0; n < data.response.length; n++){
+                let indxDelete = this.selected.findIndex(val => val.cod_produto == data.response[n].cod_produto)
+                if (indxDelete < 0){
+                  const cfgA = {
+                    headers: {
+                      Authorization: 'Bearer '+ token
+                      },
+                      data: {
+                        attendanceId: this.attendanceEditing,
+                        productId: data.response[n].cod_produto
+                      }
+                  }
+                  console.log(cfgA)
+                  this.$axios
+                    .delete(`productattendance/delete`, cfgA)
+                    .then()
+                    .catch(err => {
+                      console.log('error on GET: ', err)
+                    })
+
+                  const cnfgPL = {
+                    params: {
+                      id: data.response[n].cod_produto
+                    },
+                    headers: {
+                      Authorization: 'Bearer '+ token
+                    }
+                  }
+                  console.log('n', n)
+                  console.log('cnfgP', cnfgPL)
+                  this.$axios
+                    .get(`product/list`, cnfgPL)
+                    .then(pl => {
+                      console.log('n', n)
+                      this.cnfgPUinventory = pl.data.response[0].estoque + data.response[n-1].quantidade
+                      console.log('this.cnfgPU', this.cnfgPUinventory)
+                      const cnfgPU = {
+                        inventory: this.cnfgPUinventory
+                      }
+
+                      console.log('cnfgPU', cnfgPU)
+                      console.log('n', n)
+                      this.$axios
+                        .put(`product/update/${data.response[n-1].cod_produto}`, cnfgPU, {headers})
+                        .then()
+                        .catch(err => {
+                          console.log('error on GET: ', err)
+                        })
+                    })
+                    .catch(err => {
+                      console.log('error on GET: ', err)
+                    })     
+                    
+                  }
+                }
+              })
         }
         console.log("selected", this.selected)
         this.newProductInAttendance = false

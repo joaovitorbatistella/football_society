@@ -85,16 +85,16 @@ class Product
 
     /**
      * @param $id
-     * @param $name
-     * @param $description
-     * @param $price
-     * @param $inventory
      * @param $data
      * @return int
      */
     public function updateProduct($id, $data)
     {
-        $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET nome = :name, descricao = :description, preco = :price, estoque = :inventory WHERE codigo = :id';
+        if(!isset($data['name']) == true && !isset($data['description']) == true && !isset($data['price']) == true){
+            $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET estoque = :inventory WHERE codigo = :id';
+        } else {
+            $sqlUpdate = 'UPDATE ' . self::TABLE . ' SET nome = :name, descricao = :description, preco = :price, estoque = :inventory WHERE codigo = :id';
+        }
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlUpdate);
         $stmt->bindParam(':id', $id);

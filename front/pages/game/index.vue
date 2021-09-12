@@ -74,8 +74,7 @@
                   </v-btn>
                    <v-btn dark
                     class="mb-2"
-                    v-bind="attrs"
-                    v-on="on"
+                    @click="onStore"
                   >
                     CADASTRAR 
                   </v-btn>
@@ -511,14 +510,14 @@ export default {
       { text: 'Valor', value: 'valor' },
       { text: 'Desconto', value: 'desconto' },
       { text: 'Atend. Cliente', value: 'nome_cliente' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: 'Ações', value: 'actions', sortable: false },
     ],
     editedIndex: -1,
     editedItem: [
       {
         date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
         hour: null,
-        valor: '',
+        valor: null,
         descricao: '',
         desconto: '',
         atendimento: null
@@ -669,6 +668,26 @@ export default {
     formattedJustDate (data) {
       return moment(data).format('L');
     },
+    async onStore(){
+      this.loading = true
+      let token = Cookies.get('jwt-token')   
+        const config = {
+          headers: {
+            Authorization: 'Bearer '+ token
+            },
+        };
+      await this.$axios
+        .get(`ref/list/`, config)
+        .then(({ data }) => {
+          this.editedItem[0].valor= parseFloat(data.response[0].valor)
+          console.log("this.editedItem", this.editedItem)
+        })
+        .catch(err => {
+          console.log('error on GET: ', err)
+        })
+      this.dialog = true
+      this.loading = false
+    },
     editItem (item) {
       try {
         this.editedIndex = 1
@@ -746,7 +765,7 @@ export default {
         this.editedItem[0] = {
           date: '',
           hour: '',
-          valor: '',
+          valor: null,
           descricao: '',
           atendimento: null
         } 
@@ -827,7 +846,7 @@ export default {
             this.gamesList = data.response
             this.editedItem[0] = {
               data_hora: '',
-              valor: '',
+              valor: null,
               descricao: '',
               desconto: '',
               atendimento: null

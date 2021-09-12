@@ -277,7 +277,7 @@ export default {
       { text: 'Descrição', value: 'descricao' },
       { text: 'Preço', value: 'preco' },
       { text: 'Estoque', value: 'estoque' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: 'Ações', value: 'actions', sortable: false },
     ],
     editedIndex: -1,
     editedItem: [

@@ -86,10 +86,6 @@ class Provider
 
     /**
      * @param $id
-     * @param $name
-     * @param $address
-     * @param $telephone
-     * @param $cityId
      * @param $data
      * @return int
      */

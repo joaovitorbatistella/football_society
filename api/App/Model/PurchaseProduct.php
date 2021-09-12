@@ -46,9 +46,6 @@ class PurchaseProduct
     /**
      * @param $purchaseId
      * @param $productId
-     * @param $quantity
-     * @param $fullValue
-     * @param $unityValue
      * @param $data
      * @return int
      */

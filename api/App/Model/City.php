@@ -80,8 +80,6 @@ class City
 
     /**
      * @param $id
-     * @param $name
-     * @param $UF
      * @param $data
      * @return int
      */
