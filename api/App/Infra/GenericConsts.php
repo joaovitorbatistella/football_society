@@ -15,7 +15,9 @@ abstract class GenericConsts
         'GAME',
         'REF',
         'PRODUCTATTENDANCE',
-        'CITY'
+        'CITY',
+        'PURCHASE',
+        'PURCHASEPRODUCT'
     ];
 
     public const POST_TYPE = [
@@ -27,7 +29,9 @@ abstract class GenericConsts
         'GAME',
         'REF',
         'PRODUCTATTENDANCE',
-        'CITY'
+        'CITY',
+        'PURCHASE',
+        'PURCHASEPRODUCT'
     ];
 
     public const DELETE_TYPE = [
@@ -39,7 +43,9 @@ abstract class GenericConsts
         'GAME',
         'REF',
         'PRODUCTATTENDANCE',
-        'CITY'
+        'CITY',
+        'PURCHASE',
+        'PURCHASEPRODUCT'
     ];
 
     public const PUT_TYPE = [
@@ -51,7 +57,9 @@ abstract class GenericConsts
         'GAME',
         'REF',
         'PRODUCTATTENDANCE',
-        'CITY'
+        'CITY',
+        'PURCHASE',
+        'PURCHASEPRODUCT'
     ];
 
 

@@ -13,6 +13,8 @@ use Service\handleGame;
 use Service\handleRef;
 use Service\handleProductAttendance;
 use Service\handleCity;
+use Service\handlePurchase;
+use Service\handlePurchaseProduct;
 use Infra\GenericConsts;
 use Infra\Json;
 
@@ -22,18 +24,22 @@ class RequestValidator
     private array $requestData;
     private object $AuthorizationToken;
 
-    const GET = 'GET';
     const DELETE = 'DELETE';
     const POST = 'POST';
+    const GET = 'GET';
+
+    const REF = 'REF';
+    const CITY = 'CITY';
+    const GAME = 'GAME';
     const USERS = 'USERS';
     const PRODUCT = 'PRODUCT';
     const CUSTOMER = 'CUSTOMER';
     const PROVIDER = 'PROVIDER';
+    const PURCHASE = 'PURCHASE';
     const ATTENDANCE = 'ATTENDANCE';
-    const GAME = 'GAME';
-    const REF = 'REF';
+    const PURCHASEPRODUCT = 'PURCHASEPRODUCT';
     const PRODUCTATTENDANCE = 'PRODUCTATTENDANCE';
-    const CITY = 'CITY';
+
 
     /**
      * RequestValidator constructor.
@@ -134,6 +140,10 @@ class RequestValidator
                     $handleCity = new handleCity($this->request);
                     $return = $handleCity->validateGet();
                     break;
+                case self::PURCHASE:
+                    $handlePurchase = new handlePurchase($this->request);
+                    $return = $handlePurchase->validateGet();
+                    break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);
             }
@@ -184,6 +194,16 @@ class RequestValidator
                     $handleProductAttendance = new handleProductAttendance($this->request);
                     $handleProductAttendance->setBodyDataRequests($this->requestData);
                     $return = $handleProductAttendance->validatePost();
+                    break;
+                case self::PURCHASE:
+                    $handlePurchase = new handlePurchase($this->request);
+                    $handlePurchase->setBodyDataRequests($this->requestData);
+                    $return = $handlePurchase->validatePost();
+                    break;
+                case self::PURCHASEPRODUCT:
+                    $handlePurchaseProduct = new handlePurchaseProduct($this->request);
+                    $handlePurchaseProduct->setBodyDataRequests($this->requestData);
+                    $return = $handlePurchaseProduct->validatePost();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
@@ -242,6 +262,11 @@ class RequestValidator
                     $handleRef->setBodyDataRequests($this->requestData);
                     $return = $handleRef->validatePut();
                     break;
+                case self::PURCHASE:
+                    $handlePurchase = new handlePurchase($this->request);
+                    $handlePurchase->setBodyDataRequests($this->requestData);
+                    $return = $handlePurchase->validatePut();
+                    break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERROR_ROUTER_TYPE);
             }
@@ -288,6 +313,10 @@ class RequestValidator
                     $handleProductAttendance = new handleProductAttendance($this->request);
                     $handleProductAttendance->setBodyDataRequests($this->requestData);
                     $return = $handleProductAttendance->validateDelete();
+                    break;
+                case self::PURCHASE:
+                    $handlePurchase = new handlePurchase($this->request);
+                    $return = $handlePurchase->validateDelete();
                     break;
                 default:
                     throw new InvalidArgumentException(GenericConsts::MSG_ERRO_RECURSO_INEXISTENTE);

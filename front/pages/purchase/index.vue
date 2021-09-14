@@ -10,7 +10,7 @@
       <v-col justify="center" align="center" cols="12" lg="12" md="12" :style="{ 
         }"
       >
-        <h1>PRODUTOS</h1>
+        <h1>COMPRAS</h1>
       </v-col>
     </v-row>
 
@@ -20,9 +20,9 @@
         }"
       >
         <v-data-table
-          id="productsTable"
-          :headers="productsHeaders"
-          :items="productsList"
+          id="purchaseTable"
+          :headers="purchaseHeaders"
+          :items="purchaseList"
           sort-by="calories"
           class="elevation-1"
         >
@@ -57,6 +57,7 @@
                     >
                       <v-select
                         color="lime accent-3"
+                        disabled
                         v-model="searchOptionSelected"
                         :items="searchOptions"
                         placeholder="Selecione o filtro"
@@ -98,6 +99,7 @@
                       ></v-text-field>                      
                       <v-btn
                         class="mr-4"
+                        disabled
                         @click="search"
                       >
                         Procurar
@@ -127,7 +129,7 @@
                   <v-card-text>
                     <v-container>
                       <v-row>
-                        <v-col
+                        <!-- <v-col
                           cols="12"
                           sm="6"
                           md="6"
@@ -195,11 +197,11 @@
                              v-model="editedItem[0].quantidade"
                             label="Quantidade"
                           ></v-text-field>
-                        </v-col>
+                        </v-col> -->
                         <v-col
                           cols="12"
-                          sm="6"
-                          md="6"
+                          sm="12"
+                          md="12"
                         >
                           <v-select
                             color="lime accent-3"
@@ -212,7 +214,95 @@
                             dense
                             solo
                           ></v-select>
-                        </v-col>              
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="12"
+                          md="12"
+                        >
+                          <v-row v-if="buyComplete ==false">
+                            <v-col justify="center" align="center" cols="12" lg="10" md="10">
+                                <v-data-table
+                                  v-model="selected"
+                                  color= "lime accent-3"
+                                  checkbox-color="#c6ff00"
+                                  :headers="productsHeaders"
+                                  :items="productsList"
+                                  :items-per-page="8"
+                                  item-key="cod_produto"
+                                  show-select
+                                  class="elevation-1"
+                                  :single-select="false"
+                                >
+                                </v-data-table>
+                            </v-col>
+                            <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                              <v-btn
+                                color="lime accent-3"
+                                text
+                                @click="getSelectedsProducts"
+                              >
+                                <v-icon
+                                  medium
+                                  color="blue darken-2"
+                                >
+                                  mdi-step-forward-2
+                                </v-icon>
+                              </v-btn>
+                              <v-btn
+                                v-if="selected.length > 0"
+                                color="lime accent-3"
+                                text
+                                @click="setEmptyCart"
+                              >
+                                <v-icon
+                                  medium
+                                  color="red darken-2"
+                                >
+                                  mdi-cart-remove
+                                </v-icon>
+                              </v-btn>
+                              <v-btn
+                                v-if="productsHasBeenSelecteds"
+                                color="green darken-1"
+                                text
+                                @click="confirmProducts"
+                              >
+                                <v-icon
+                                  medium
+                                  color="green darken-2"
+                                >
+                                  mdi-check-all
+                                </v-icon>
+                              </v-btn>
+                              <v-btn
+                                color="lime accent-3"
+                                text
+                                @click="reloadProducts"
+                              >
+                                <v-icon
+                                  medium
+                                  color="orange darken-2"
+                                >
+                                  mdi-reload
+                                </v-icon>
+                              </v-btn>
+                              <v-btn
+                                color="lime accent-3"
+                                text
+                                target="_blank"
+                                href="/product"
+                              >
+                                <v-icon
+                                  medium
+                                  color="green darken-1"
+                                >
+                                  mdi-tag-plus
+                                </v-icon>
+                              </v-btn>
+                            </v-col>
+                          </v-row>
+                        </v-col>
                       </v-row>
                     </v-container>
                   </v-card-text>
@@ -236,10 +326,94 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
+              <v-dialog
+                v-model="productsDialog"
+                color= "lime accent-3"
+                width="800px"
+                height="100%"
+              >
+                <!-- PRODUCTS -->
+                <v-card
+                  width="800px"
+                  height="100%"
+                >
+                  <v-card-title>
+                    <span class="text-h5"> CARRINHO DE COMPRAS </span>
+                  </v-card-title>
+
+                  <v-card-text>
+                    <v-container>
+                      <v-layout v-for="(product, index) in selected" :key="product.codigo">
+                        <v-row>
+                          <v-col justify="center" align="center" cols="12" lg="8" md="8">
+                            <v-text-field
+                              :value="product.nome"
+                              :id="index"
+                              color="lime accent-3"
+                              label="Nome do produto"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-text-field
+                              :id="index"
+                              :value="product.preco"
+                              color="lime accent-3"
+                              label="Preço"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                          <!-- <v-col v-if="editedIndex == -1" justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-text-field
+                              v-model="quantity[index]"
+                              color= "lime accent-3"
+                              :value="0"
+                              :id="index"
+                              type="number"
+                              color="lime accent-3"
+                              label="Quantidade"
+                              required
+                            ></v-text-field>
+                          </v-col> -->
+                          <v-col justify="center" align="center" cols="12" lg="2" md="2">
+                            <v-text-field
+                              v-model="product.quantity"
+                              color= "lime accent-3"
+                              :value="0"
+                              :id="index"
+                              type="number"
+                              label="Quantidade"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-layout>
+                    </v-container>
+                  </v-card-text>
+          
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="lime accent-3"
+                      text
+                      @click="closeProducts"
+                    >
+                      Cancel
+                    </v-btn>
+                    <v-btn
+                      color="lime accent-3"
+                      text
+                      @click="buyProducts"
+                    >
+                      Save
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
               <v-dialog  color= "lime accent-3"
               v-model="dialogDelete" max-width="500px">
                 <v-card>
-                  <v-card-title class="text-h5">Você deseja excluir este produto?</v-card-title>
+                  <v-card-title class="text-h5">Você deseja excluir esta compra?</v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="lime accent-3" text @click="closeDelete">Cancel</v-btn>
@@ -250,15 +424,14 @@
               </v-dialog>
             </v-toolbar>
           </template>
-          <template v-slot:item.preco="{ item }">
-            <span>R$ {{ item.preco }}</span>
-          </template>
-          <template v-slot:item.estoque="{ item }">
-            <span>{{ item.estoque }} un</span>
+          <template v-slot:item.valor_total_compra="{ item }">
+            <span v-if="item.valor_total_compra > 0">R$ {{ item.valor_total_compra }}</span>
+            <span v-else>R$ 0,00</span>
           </template>
           <template v-slot:item.actions="{ item }">
             <v-icon
               small
+              disabled
               class="mr-2"
               @click="editItem(item.cod_produto)"
             >
@@ -266,7 +439,7 @@
             </v-icon>
             <v-icon
               small
-              @click="deleteItem(item.cod_produto)"
+              @click="deleteItem(item.cod_compra)"
             >
               mdi-delete
             </v-icon>
@@ -303,30 +476,42 @@ export default {
       { id: 2, value: 'Nome' },
     ],
     searchOptionSelected: [],
+    productsDialog: false,
+    buyComplete: false,
+    insertedPurchaseId: null,
     searchName: '',
+    buyComplete: false,
+    toDelte: null,
+    productsList: [],
+    productData: {
+      name: '',
+      description: '',
+      price: null,
+      inventory: null,
+    },
+    selected: [],
+    productsHeaders: [
+      { text: 'Código', value: 'cod_produto' },
+      { text: 'Nome', value: 'nome' },
+      { text: 'Preço', value: 'preco' },
+      { text: 'Estoque', value: 'estoque' },
+    ],
     searchId: null,
     dialog: false,
     dialogDelete: false,
     editingProduct: null,
     providersList: [],
-    productsList: [],
-    heading: 'Relatorio de Produtos',
-    productsHeaders: [
-      { text: 'Código', value: 'cod_produto' },
-      { text: 'Nome', value: 'nome' },
-      { text: 'Descrição', value: 'descricao' },
-      { text: 'Preço', value: 'preco' },
-      { text: 'Estoque', value: 'estoque' },
+    purchaseList: [],
+    heading: 'Relatorio de Compras',
+    purchaseHeaders: [
+      { text: 'Código', value: 'cod_compra' },
+      { text: 'Data', value: 'data' },
+      { text: 'Valor Total', value: 'valor_total_compra' },
       { text: 'Ações', value: 'actions', sortable: false },
     ],
     editedIndex: -1,
     editedItem: [
       {
-        nome: '',
-        descricao: '',
-        preco: '',
-        estoque: '',
-        valor_unitario: null,
         fornecedor: null
       }
     ],
@@ -335,13 +520,14 @@ export default {
   async beforeMount() {
     try {
       this.updateTable()
+      this.reloadProducts()
     } catch(e) {
       console.log("erro: ", e)
     }
   },
  computed: {
     formTitle () {
-      return this.editedIndex === -1 ? 'Novo Produto' : 'Editar Produto'
+      return this.editedIndex === -1 ? 'Nova Compra' : 'Editar Compra'
     },
   },
 
@@ -354,68 +540,63 @@ export default {
     },
   },
   methods: {
-    async search() {
+    async reloadProducts() {
       let token = Cookies.get('jwt-token')   
       this.loading = true
-      switch (this.searchOptionSelected.id) {
-        case 1:
-          const configIdproduct = {
-            headers: {
-              Authorization: 'Bearer '+ token
-              },
-              params: {
-                id: this.searchId
-              }
-            };
-            console.log(configIdproduct)
-            await this.$axios
-              .get(`product/list/`, configIdproduct)
-              .then(({ data }) => {
-                this.productsList = []
-                this.productsList = data.response   
-              })
-              .catch(err => {
-                console.log('error on GET: ', err)
-              })
-            this.loading = false
-          break;
-
-        case 2:
-          const configNameproduct = {
-            headers: {
-              Authorization: 'Bearer '+ token
-              },
-              params: {
-                name: this.searchName
-              }
-            };
-            console.log(configNameproduct)
-            await this.$axios
-              .get(`product/list/`, configNameproduct)
-              .then(({ data }) => {
-                this.productsList = []
-                this.productsList = data.response   
-              })
-              .catch(err => {
-                console.log('error on GET: ', err)
-              })
-            this.loading = false
-          break;
-      
-        default:
-          break;
+      const configIdproduct = {
+        headers: {
+          Authorization: 'Bearer '+ token
+          },
+      };
+        console.log(configIdproduct)
+        await this.$axios
+          .get(`product/list`, configIdproduct)
+          .then(({ data }) => {
+            this.productsList = []
+            this.productsList = data.response   
+          })
+          .catch(err => {
+            console.log('error on GET: ', err)
+          })
+        this.loading = false
+    },
+    buyProducts() {
+      for(var i=0; i < this.selected.length; i++) {
+        if(this.selected[i].hasOwnProperty('oldQuantity') == false){
+          this.selected[i].oldQuantity = 0
+        }
+        if(this.selected[i].quantity < 0) {     
+          alert('Informe a quantidade')
+        }
       }
+      this.productsHasBeenSelecteds = true
+      this.closeProducts()
+    },
+    closeProducts(){
+      this.productsDialog = false
+      this.buyComplete = false
+    },
+    getSelectedsProducts() {
+      if(this.selected.length > 0) {
+        this.productsDialog = true
+      } else {
+        alert('Selecione algum produto')
+      }
+    },
+    setEmptyCart() {
+      this.selected = []
+    },
+    confirmProducts() {
+      this.buyComplete = true
     },
     generatePDF() {
       const columns = [
-        { title: "Codigo", dataKey: "cod_produto" },
-        { title: "Nome", dataKey: "nome" },
-        { title: "Descricao", dataKey: "descricao" },
-        { title: "Preco", dataKey: "preco" },
-        { title: "Estoque", dataKey: "estoque" },
+        { title: "Codigo", dataKey: "cod_compra" },
+        { title: "Data", dataKey: "data" },
+        { title: "Valor Total", dataKey: "valor_total_compra" },
       ];
 
-      console.log(this.productsList)
+      console.log(this.purchaseList)
 
       const doc = new jsPDF({
         orientation: "landscape",
@@ -434,7 +615,7 @@ export default {
      
       doc.autoTable({
         columns,
-        body: this.productsList,
+        body: this.purchaseList,
         margin: { left: 0.5, top: 2 },
         theme: 'striped'
       });
@@ -506,22 +687,23 @@ export default {
     deleteItem (key) {
       this.dialogDelete = true
       this.toDelte = key
+      console.log(this.toDelte)
     },
 
     async deleteItemConfirm (key) {
       this.loading = true
       let token = Cookies.get('jwt-token')   
       let headers= {
-            'Authorization': 'Bearer '+ token
-            }
+        'Authorization': 'Bearer '+ token
+      }
       
 
       await this.$axios
-        .delete(`product/delete/${key}`, {headers})
+        .delete(`purchase/delete/${key}`, {headers})
         .then(({data}) => {
           console.log(data)
           if(data.type != 'success') {
-            alert('Este produto está associado à atendimentos, corrija isto e tente novamente!')
+            alert('Esta compra está associado à produtos, corrija isto e tente novamente!')
             this.closeDelete()
             return;
           }
@@ -538,14 +720,7 @@ export default {
       this.loading = false
       this.$nextTick(() => {
         this.editedItem[0] = {
-          nome: '',
-          dt_nascimento: '',
-          telefone: '',
-          email: '',
-          logradouro: '',
-          sexo: '',
-          cpf: '',
-          cidade: null
+          fornecedor: null
         } 
         this.editedIndex = -1
         this.editingProduct = null
@@ -557,7 +732,7 @@ export default {
       this.loading = false
     },
 
-    save () {
+    async save () {
       if (this.editedIndex > -1) {
         this.loading = true
         let token = Cookies.get('jwt-token')   
@@ -580,34 +755,83 @@ export default {
             console.log('error on GET: ', err)
           })
       } else {
-        this.loading = true
         let token = Cookies.get('jwt-token')   
         let headers= {
-                'Authorization': 'Bearer '+ token
-                }
-          const data = {
-            name: this.editedItem[0].nome,
-            description: this.editedItem[0].descricao,
-            price: this.editedItem[0].preco,
-            inventory: this.editedItem[0].estoque
+          'Authorization': 'Bearer '+ token
+        }
+
+        const purchaseData = {
+            providerId: this.editedItem[0].fornecedor.cod_fornecedor,
           }
-          console.log(data)
-          this.$axios
-            .post(`product/store/`, data, {headers})
-            .then(({ data }) => {
-              console.log(data)
-              
+        this.loading = true
+        await this.$axios
+          .post(`purchase/store/`, purchaseData, {headers})
+          .then(( {data} ) => {
+            this.insertedPurchaseId = data.response.insertedId
+          })
+          .catch(err => {
+            console.log('error on GET: ', err)
+          })
+
+        if(this.selected.length > 0){
+          console.log("selected b", this.selected)
+          for(var i=0; i < this.selected.length; i++){
+            console.log("for")
+            const purchaseProductData = {
+              purchaseId: this.insertedPurchaseId,
+              productId: this.selected[i].cod_produto,
+              quantity: this.selected[i].quantity,
+              fullPrice: this.selected[i].preco * this.selected[i].quantity,
+              unityPrice: this.selected[i].preco
+            }
+          console.log("purchaseProductData", purchaseProductData)
+          console.log("tem que estar vazio", this.productData)
+        
+          await this.$axios
+            .post(`purchaseproduct/store/`, purchaseProductData, {headers})
+            .then(pad => {
+              console.log("PAD", pad)
+              if(pad.data.type == 'success') {
+                console.log("-> prox. list/id", this.selected[i])
+              }
             })
             .catch(err => {
               console.log('error on GET: ', err)
             })
+          await this.$axios
+            .get(`product/list/${this.selected[i].cod_produto}`, {headers})
+            .then(pd => {
+              console.log("PD",pd)
+              this.productData = {
+                name: pd.data.response.nome,
+                description: pd.data.response.descricao,
+                price: pd.data.response.preco,
+                inventory: parseInt(pd.data.response.estoque) + parseInt(this.selected[i].quantity),
+              }
+              console.log("product Data -> prox. update", this.productData)
+            })
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+          await this.$axios
+            .put(`product/update/${this.selected[i].cod_produto}`, this.productData, {headers})
+            .then()
+            .catch(err => {
+              console.log('error on GET: ', err)
+              this.loading = false
+            })
+          }     
+        }
+        console.log("selected", this.selected)
+        await this.updateTable()
       }
       this.updateTable()
     },
     async updateTable() {
         this.searchOptionSelected = []
         this.loading = true
-        this.productList = []
+        this.purchaseList = []
         let token = Cookies.get('jwt-token')   
         const config = {
             headers: {
@@ -615,9 +839,9 @@ export default {
               }
         };
         await this.$axios
-          .get(`product/list`, config)
+          .get(`purchase/list`, config)
           .then(({ data }) => {
-            this.productsList = data.response
+            this.purchaseList = data.response
           })
           .catch(err => {
             console.log('error on GET: ', err)

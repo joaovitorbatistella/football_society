@@ -24,22 +24,21 @@ class PurchaseProduct
      * @param $purchaseId
      * @param $productId
      * @param $quantity
-     * @param $fullValue
-     * @param $unityValue
+     * @param $fullPrice
+     * @param $unityPrice
      * @return int
      */
-    public function insertPurchaseProduct($purchaseId, $productId, $quantity, $fullValue, $unityValue)
+    public function insertPurchaseProduct($purchaseId, $productId, $quantity, $fullPrice, $unityPrice)
     {
-        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (cod_compra, cod_produto, quantidade, valor_total, valor_unit) VALUES (:purchaseId, :productId, :quantity, :fullValue, :unityValue)';
+        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (cod_compra, cod_produto, quantidade, valor_total, valor_unitario) VALUES (:purchaseId, :productId, :quantity, :fullPrice, :unityPrice)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);
         $stmt->bindParam(':purchaseId', $purchaseId);
         $stmt->bindParam(':productId', $productId);
         $stmt->bindParam(':quantity', $quantity);
-        $stmt->bindParam(':fullValue', $fullValue);
-        $stmt->bindParam(':unityValue', $unityValue);
+        $stmt->bindParam(':fullPrice', $fullPrice);
+        $stmt->bindParam(':unityPrice', $unityPrice);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt;
     }
 
@@ -60,7 +59,6 @@ class PurchaseProduct
         $stmt->bindValue(':fullValue', $data['fullValue']);
         $stmt->bindValue(':unityValue', $data['unityValue']);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt->rowCount();
     }
 

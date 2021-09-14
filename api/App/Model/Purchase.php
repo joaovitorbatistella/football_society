@@ -18,6 +18,63 @@ class Purchase
     public function __construct()
     {
         $this->Conn = new DBConnection();
+        $this->DateTime = new DateTime();
+    }
+
+    /**
+     * @param $table
+     * @return Array
+     */
+    public function getAllPurchases($table)
+    {
+        if ($table) {
+            $sql = "SELECT c.codigo AS cod_compra, c.data, sum(cp.valor_total) AS valor_total_compra 
+                        FROM compra c 
+                        LEFT JOIN compra_produto cp ON c.codigo = cp.cod_compra 
+                        GROUP BY cp.cod_compra, c.codigo 
+                        ORDER BY c.codigo desc";
+            $stmt = $this->getConn()->getDb()->query($sql);
+            if($stmt) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($row) && count($row) > 0) {
+                    return $row;
+                }
+            }
+            header("HTTP/1.1 406 Not Acceptable");
+            throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+        }
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);
+    }
+
+    /**
+     * @param $param
+     * @return int
+     */
+    public function getPurchasesByParams($param)
+    {
+        if($param[0] == 'id'){
+            $sql = "SELECT c.codigo AS cod_compra, c.data, sum(cp.valor_total) AS valor_total_compra 
+                        FROM compra c 
+                        LEFT JOIN compra_produto cp ON c.codigo = cp.cod_compra 
+                        GROUP BY cp.cod_compra, c.codigo
+                        WHERE c.codigo = ". $param[1]." 
+                        ORDER BY c.codigo desc";
+        } else if($param[0] == 'data'){
+            $sql = "SELECT c.codigo AS cod_compra, c.data, sum(cp.valor_total) AS valor_total_compra 
+                        FROM compra c 
+                        LEFT JOIN compra_produto cp ON c.codigo = cp.cod_compra 
+                        GROUP BY cp.cod_compra, c.codigo
+                        WHERE c.nome LIKE '%".$param[1]."%'
+                        ORDER BY c.codigo desc";
+        }
+        
+        $stmt = $this->getConn()->getDb()->query($sql);
+
+        if($stmt) {
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $row;
+        } header("HTTP/1.1 406 Not Acceptable");
+        throw new InvalidArgumentException(GenericConsts::MSG_ERRO_WITHOUT_RETURN);        
     }
 
     /**
@@ -25,15 +82,15 @@ class Purchase
      * @param $providerId
      * @return int
      */
-    public function insertPurchase($quantidade, $providerId)
+    public function insertPurchase($providerId)
     {
-        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (quantidade, cod_fornecedor) VALUES (:quantity, :providerId)';
+        $date = $this->DateTime->getNow();
+        $sqlInsert = 'INSERT INTO ' . self::TABLE . ' (data, cod_fornecedor) VALUES (:date, :providerId)';
         $this->Conn->getDb()->beginTransaction();
         $stmt = $this->Conn->getDb()->prepare($sqlInsert);
-        $stmt->bindParam(':quantity', $quantity);
+        $stmt->bindParam(':date', $date);
         $stmt->bindParam(':providerId', $providerId);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt;
     }
 
@@ -51,7 +108,6 @@ class Purchase
         $stmt->bindValue(':quantity', $data['quantity']);
         $stmt->bindValue(':providerId', $data['providerId']);
         $stmt->execute();
-        var_dump($stmt);exit;
         return $stmt->rowCount();
     }
 

@@ -15,10 +15,6 @@
       color="blue-grey"
       grow
     >
-      <v-btn href="/ref">
-        <span>Valor Ref.</span>
-        <v-icon>mdi-gift-open-outline</v-icon>
-      </v-btn>
       <v-btn v-if="token != undefined" @click="logout">
         <span>Sair</span>
         <v-icon>mdi-logout</v-icon>
