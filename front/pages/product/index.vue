@@ -173,46 +173,7 @@
                             label="Estoque do produto"
                             type="number"
                           ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="3"
-                          md="3"
-                        >
-                          <v-text-field
-                             color= "lime accent-3"
-                             v-model="editedItem[0].valor_unitario"
-                            label="Valor unitario de compra do poduto"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="3"
-                          md="3"
-                        >
-                          <v-text-field
-                             color= "lime accent-3"
-                             v-model="editedItem[0].quantidade"
-                            label="Quantidade"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="6"
-                        >
-                          <v-select
-                            color="lime accent-3"
-                            v-model="editedItem[0].fornecedor"
-                            :items="providersList"
-                            placeholder="Selecione o fornecedor"
-                            return-object
-                            item-text="nome"
-                            item-value="cod_fornecedor"
-                            dense
-                            solo
-                          ></v-select>
-                        </v-col>              
+                        </v-col>   
                       </v-row>
                     </v-container>
                   </v-card-text>

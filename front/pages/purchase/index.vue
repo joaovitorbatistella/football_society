@@ -558,6 +558,7 @@ export default {
           .catch(err => {
             console.log('error on GET: ', err)
           })
+        this.selected = []
         this.loading = false
     },
     buyProducts() {
@@ -734,26 +735,7 @@ export default {
 
     async save () {
       if (this.editedIndex > -1) {
-        this.loading = true
-        let token = Cookies.get('jwt-token')   
-        let headers= {
-              'Authorization': 'Bearer '+ token
-              }
-        const data = {
-            name: this.editedItem[0].nome,
-            description: this.editedItem[0].descricao,
-            price: this.editedItem[0].preco,
-            inventory: this.editedItem[0].estoque
-          }
-        
-        this.$axios
-          .put(`product/update/${this.editingProduct}`, data, {headers})
-          .then(({ data }) => {
-            console.log(data)
-          })
-          .catch(err => {
-            console.log('error on GET: ', err)
-          })
+       console.log('n deve entrar')
       } else {
         let token = Cookies.get('jwt-token')   
         let headers= {
@@ -773,7 +755,9 @@ export default {
             console.log('error on GET: ', err)
           })
 
-        if(this.selected.length > 0){
+          console.log('this.insertedPurchaseId', this.insertedPurchaseId)
+
+        if(this.selected.length > 0 &  this.insertedPurchaseId != false){
           console.log("selected b", this.selected)
           for(var i=0; i < this.selected.length; i++){
             console.log("for")
@@ -784,8 +768,8 @@ export default {
               fullPrice: this.selected[i].preco * this.selected[i].quantity,
               unityPrice: this.selected[i].preco
             }
-          console.log("purchaseProductData", purchaseProductData)
-          console.log("tem que estar vazio", this.productData)
+            console.log("purchaseProductData", purchaseProductData)
+            console.log("tem que estar vazio", this.productData)
         
           await this.$axios
             .post(`purchaseproduct/store/`, purchaseProductData, {headers})
@@ -822,6 +806,8 @@ export default {
               this.loading = false
             })
           }     
+        } else {
+          alert('Aconteceu algum erro na requisição!')
         }
         console.log("selected", this.selected)
         await this.updateTable()
@@ -855,8 +841,8 @@ export default {
           .catch(err => {
             console.log('error on GET: ', err)
           })
-        this.close()
-
+      this.reloadProducts()
+      this.close()
     }
   },
 }

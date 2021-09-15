@@ -59,7 +59,7 @@ class Attendance
     {
         if($param[0] == 'id'){
             $id = (int)$param[1];
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
@@ -72,7 +72,7 @@ class Attendance
             ORDER BY a.codigo desc";
         } else if($param[0] == 'status'){
             $param[1] = (int)$param[1] == 1 ? 'Y' : 'N';
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
@@ -85,7 +85,7 @@ class Attendance
             ORDER BY a.codigo desc";
         }
         else if($param[0][0] == 'startDate' && $param[1][0] == 'endDate'){           
-            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
+            $sql = "SELECT a.codigo, a.descricao, a.data_hora, a.pago, a.cod_cliente, cl.nome AS nome_cliente, j.data_hora AS horario_jogo, j.data_hora AS horario_jogo, sum(pa.valor_total) as valor_produtos,
             (
                 select sum(valor - desconto) as valor_jogos from jogo where cod_atendimento = a.codigo group by cod_atendimento 
             )
