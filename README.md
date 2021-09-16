@@ -27,13 +27,39 @@ ___
 
 ## Passo a passo
 
-* Clone o repositório;
+* Clone o repositório para a pasta dos seus projetos apache;
+* Você deverá configurar o servidor virtual do apache direcionando para a pasta 'api/' do projeto
+###### Veja o exemplo: 
+
+```txt
+<VirtualHost football-society:80>
+  DocumentRoot "/var/www/football-society/api/"
+  ServerName football-society
+  <Directory "/var/www/football-society/api/">
+    AllowOverride All
+    Require all granted
+  </Directory>
+</VirtualHost>
+```
+
 * Na pasta 'api/', devemos renomear o arquivo 'env_example.php' para 'env.php' e completar com os dados do seu BD e seu SECRET, este para a criptografia JWT;
 * Acesse seu terminal ou PowerShell e siga as instruções abaixo
 
 ```bash
 npm install
 ```
+
+* Na pasta 'front/', procure pelo arquivo 'nuxt.config.js', nele você terá de especificar o endereço da sua api, ex:
+
+```js
+publicRuntimeConfig: {
+    axios: {
+      baseURL: 'http://football-society/'
+    }
+  },
+```
+
+* Então basta rodar o servidor de desenvolvimento:
 
 ```bash
 npm run dev
